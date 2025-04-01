@@ -50,7 +50,7 @@ exports.initializePayment = async (req, res) =>{
     } catch (error) {
         console.log(error.message);
         res.status(500).json({
-            message: ' Internal server error'
+            message: ' Internal server error ' + error.message
         })
         
     }
