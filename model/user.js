@@ -1,11 +1,10 @@
-const { lowerCase } = require("lodash");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      trim: true, //This trims before it validates
+      trim: true, 
       required: true,
     },
     email: {
@@ -18,18 +17,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    isAdmin: {
-      type: Boolean,
-      default: false
-    },
-    isSuperAdmin: {
-      type: Boolean,
-      default: false
-    }
   },
   { timestamps: true }
 );

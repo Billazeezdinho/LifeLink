@@ -1,5 +1,6 @@
 const { userModel } = require('../model/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 exports.register = async (req, res) => {
@@ -35,3 +36,38 @@ exports.register = async (req, res) => {
       });
     }
   };
+
+  exports.login = async (req, res)=>{
+    try{
+      const {email, password} = req.body;
+      if(email == undefined || password == undefined){
+        return res.status(400).json({
+          message: 'Email and password required'
+        })
+      }
+  
+    const user = await userModel.findOne({email: email.toLowerCase() });
+    if(user == null){
+      return res.status(404).json({
+        message: 'User Not Found'
+      })
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    if(isPasswordCorrect == false){
+      return res.status(400).json({
+        message: 'Incorrect Password'
+      })
+    }
+    const token = await jwt.sign({ userId: user._id}, process.env.key, { expiresIn: "1d" });
+    res.status(200).json({
+      message: 'Logged In Successfully',
+      data: user,
+      token
+    })
+    }catch(error){
+      console.log(error.message)
+      res.status(500).json({
+        message: 'Internal Server Error '+ error.message
+      })
+    }
+  }
