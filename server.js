@@ -6,6 +6,14 @@ const transactionRouter = require('./routes/transactionRouter')
 const cors = require('cors');
 const morgan = require('morgan');
 
+// DATABASE_URI = mongodb+srv://billazeezdinho:RpgIDtMbHzKpK7nr@dinhocloud.q3ahc.mongodb.net/lifelinktesting
+// PORT = 2115
+// key = secret_key
+// korapay_secret_key = sk_test_4XnbqqTxrfDzmHgz26o1wGovmZQjfLjq8hyvurWh
+// userEmail= kristenhosh@gmail.com
+// passEmail= ekqqvrmhufzmcuit
+
+
 const app = express();
 
 app.use(express.json());
