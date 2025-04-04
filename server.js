@@ -36,7 +36,7 @@ const swaggerOptions = {
         }
     ],
   },
-  apis: ["./routes/*.js"], // Load API documentation from route files
+  apis: ["routes/*.js"], // Load API documentation from route files
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

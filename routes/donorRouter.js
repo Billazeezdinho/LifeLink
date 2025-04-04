@@ -12,14 +12,7 @@
 // module.exports = router;
 
 const router = require('express').Router();
-const {
-  register,
-  login,
-  resetNewPassword,
-  changePassword,
-  forgotPassword,
-  getAllDonor,
-} = require('../controller/donorController');
+const {  register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor,} = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 
 /**
