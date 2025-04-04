@@ -1,7 +1,7 @@
 const express = require('express');
 require('./config/database');
 const PORT = process.env.PORT;
-const userRouter = require('./routes/userRouter')
+const userRouter = require('./routes/donorRouter')
 const transactionRouter = require('./routes/transactionRouter')
 const cors = require('cors');
 const morgan = require('morgan');
