@@ -21,7 +21,7 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "LifeLink Blood Donor Documentation",
+      title: " LifeLink Blood Donor Documentation",
       version: "1.0.0",
       description: "API for managing blood donors",
       license: {
@@ -51,7 +51,7 @@ app.use('/api/v1', transactionRouter);
 
 app.listen(PORT, ()=>{
     console.log(`Server is listening to PORT: ${PORT}`);
-    console.log(`Swagger docs available at https://hotel-api-svnc.onrender.com/api-docs`);
+    console.log(`Swagger docs available at https://lifelink-7pau.onrender.com/api-docs`);
 })
 
 
