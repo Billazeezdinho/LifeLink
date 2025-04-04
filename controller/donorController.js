@@ -9,7 +9,7 @@ const sendMail = require("../utils/email");
 exports.register = async (req, res) => {
     try {
       //Extract required data from request body
-      const { fullName, email, password } = req.body;
+      const { fullName, email, password, bloodType, location } = req.body;
       const userExists = await donorModel.findOne({ email: email.toLowerCase() });
       if (userExists){
         return res.status(400).json({
@@ -25,6 +25,8 @@ exports.register = async (req, res) => {
         fullName: fullName.trim(),
         email: email.toLowerCase(),
         password: hashedPassword,
+        bloodType,
+        location
       });
       await donor.save();
 
@@ -75,7 +77,7 @@ exports.register = async (req, res) => {
     }
   }
 
-  exports.getAll = async (req, res) =>{
+  exports.getAllDonor = async (req, res) =>{
     try{
       const donors = await donorModel.find();
     res.status(200).json({
