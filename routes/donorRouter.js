@@ -147,7 +147,6 @@ router.patch('/forgot', forgotPassword);
  * @swagger
  * /resetPassword/{token}:
  * /donor/resetPassword/{token}:
->>>>>>> origin/jtown
  *   patch:
  *     summary: Reset password using a token
  *     tags: [Donors]
