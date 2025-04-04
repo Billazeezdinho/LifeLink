@@ -1,5 +1,5 @@
-const Hospital = require('../model/hospital');
-const User = require('../model/user');
+const Hospital = require('../model/hospitalModel');
+
 
 exports.searchForDonors = async (req, res) => {
   try {
