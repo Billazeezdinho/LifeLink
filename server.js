@@ -3,6 +3,9 @@ require('./config/database');
 const PORT = process.env.PORT;
 const donorRouter = require('./routes/donorRouter')
 const transactionRouter = require('./routes/transactionRouter')
+const dRouter = require('./routes/donorrRoutes');
+const hospitalRoutes = require('./routes/hospitalRoutes')
+const adminRoutes = require('./routes/adminRoutes')
 const cors = require('cors');
 const morgan = require('morgan');
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -21,9 +24,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: " LifeLink Blood Donor Documentation ",
+      title: "LifeLink Blood Donor Documentation",
       version: "1.0.0",
-      description: " API for managing blood donors ",
+      description: "API for managing blood donors",
       license: {
         name: "base:https://lifelink-7pau.onrender.com/api/v1",
       }
@@ -48,6 +51,11 @@ app.get('/', (req, res)=>{
 })
 app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api/donor', dRouter);
+app.use('/api/hospital', hospitalRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 app.listen(PORT, ()=>{
     console.log(`Server is listening to PORT: ${PORT}`);
@@ -79,11 +87,7 @@ app.listen(PORT, ()=>{
 // // Middleware
 // app.use(express.json());
 
-// // Routes
-// app.use('/api/auth', authRoutes);
-// app.use('/api/donor', donorRoutes);
-// app.use('/api/hospital', hospitalRoutes);
-// app.use('/api/admin', adminRoutes);
+// Routes
 
 // // Connect to MongoDB
 // mongoose

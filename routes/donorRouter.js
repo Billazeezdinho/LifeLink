@@ -10,10 +10,8 @@
 // router.get('/donors', getAllDonor)
 
 // module.exports = router;
-
-
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor } = require('../controller/donorController');
+const {  register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor, } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 
 /**
@@ -37,6 +35,10 @@ const { registerValidate } = require('../middleware/validate');
  *         password:
  *           type: string
  *           description: Secure password
+ *           description: Donor's email (e.g., LifeLink@theCurve.com)
+ *         password:
+ *           type: string
+ *           description: Secure password (e.g., Curvedev123)
  *         bloodType:
  *           type: string
  *           description: Blood group (optional)
@@ -47,6 +49,8 @@ const { registerValidate } = require('../middleware/validate');
  *         fullName: John Doe
  *         email: johndoe@example.com
  *         password: SecurePass123
+ *         email: LifeLink@theCurve.com
+ *         password: Curvedev123
  *         bloodType: O+
  *         location: Lagos, Nigeria
  */
@@ -92,11 +96,17 @@ router.post('/donor/register', registerValidate, register);
  *               password:
  *                 type: string
  *                 example: SecurePass123
+ *                 example: LifeLink@theCurve.com
+ *               password:
+ *                 type: string
+ *                 example: Curvedev123
  *     responses:
  *       200:
  *         description: Login successful, returns token
  *       400:
  *         description: Incorrect email or password
+ *         description: Missing email or password / Incorrect password
+>>
  *       404:
  *         description: Donor not found
  *       500:
@@ -107,6 +117,7 @@ router.post('/donor/login', login);
 /**
  * @swagger
  * /forgot:
+ * /donor/forgot:
  *   patch:
  *     summary: Request password reset link
  *     tags: [Donors]
@@ -120,6 +131,8 @@ router.post('/donor/login', login);
  *               email:
  *                 type: string
  *                 example: johndoe@example.com
+ *                 example: LifeLink@theCurve.com
+>>>>>>> origin/jtown
  *     responses:
  *       200:
  *         description: Reset password link sent successfully
@@ -133,6 +146,8 @@ router.patch('/forgot', forgotPassword);
 /**
  * @swagger
  * /resetPassword/{token}:
+ * /donor/resetPassword/{token}:
+>>>>>>> origin/jtown
  *   patch:
  *     summary: Reset password using a token
  *     tags: [Donors]
@@ -152,7 +167,11 @@ router.patch('/forgot', forgotPassword);
  *             properties:
  *               newPassword:
  *                 type: string
+<<<<<<< HEAD
  *                 example: NewSecurePass123
+=======
+ *                 example: NewPass@123
+>>>>>>> origin/jtown
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -165,7 +184,11 @@ router.patch('/resetPassword/:token', resetNewPassword);
 
 /**
  * @swagger
+<<<<<<< HEAD
  * /change:
+=======
+ * /donor/change:
+>>>>>>> origin/jtown
  *   patch:
  *     summary: Change donor's password
  *     tags: [Donors]
