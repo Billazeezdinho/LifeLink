@@ -21,9 +21,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "LifeLink Blood Donation Documentation",
+      title: "LifeLink Blood Donor Documentation",
       version: "1.0.0",
-      description: "API where hospital can easily invite donor to donate blood",
+      description: "API for managing blood donors",
       license: {
         name: "base:https://lifelink-7pau.onrender.com/api/v1",
       }
