@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const donorSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
@@ -21,5 +21,5 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-exports.userModel = mongoose.model("user", userSchema)
+exports.donorModel = mongoose.model("donors", donorSchema)
 

@@ -1,13 +1,16 @@
-const { userModel } = require('../model/donorModel');
+const { donorModel } = require('../model/donorModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const resetMail = require("../utils/resetMail");
+const sendMail = require("../utils/email");
+
 
 
 exports.register = async (req, res) => {
     try {
       //Extract required data from request body
       const { fullName, email, password } = req.body;
-      const userExists = await userModel.findOne({ email: email.toLowerCase() });
+      const userExists = await donorModel.findOne({ email: email.toLowerCase() });
       if (userExists){
         return res.status(400).json({
           message: `Email ${email} is already registered`,
@@ -18,16 +21,16 @@ exports.register = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, salt);
   
       //Create user
-      const user = new userModel({
+      const donor = new donorModel({
         fullName: fullName.trim(),
         email: email.toLowerCase(),
         password: hashedPassword,
       });
-      await user.save();
+      await donor.save();
 
       res.status(201).json({
-        message: "User created successfully",
-        data: user,
+        message: "Donor created successfully",
+        data: donor,
       });
     } catch (error) {
       console.log(error.message);
@@ -46,22 +49,22 @@ exports.register = async (req, res) => {
         })
       }
   
-    const user = await userModel.findOne({email: email.toLowerCase() });
-    if(user == null){
+    const donor = await donorModel.findOne({email: email.toLowerCase() });
+    if(donor == null){
       return res.status(404).json({
-        message: 'User Not Found'
+        message: 'Donor Not Found'
       })
     }
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    const isPasswordCorrect = await bcrypt.compare(password, donor.password)
     if(isPasswordCorrect == false){
       return res.status(400).json({
         message: 'Incorrect Password'
       })
     }
-    const token = await jwt.sign({ userId: user._id}, process.env.key, { expiresIn: "1d" });
+    const token = await jwt.sign({ donorId: donor._id}, process.env.key, { expiresIn: "1d" });
     res.status(200).json({
       message: 'Logged In Successfully',
-      data: user,
+      data: donor,
       token
     })
     }catch(error){
@@ -74,10 +77,10 @@ exports.register = async (req, res) => {
 
   exports.getAll = async (req, res) =>{
     try{
-      const users = await userModel.find();
+      const donors = await donorModel.find();
     res.status(200).json({
       message: "All Donor's in the database",
-      data: users
+      data: donors
     })}
     catch(error){
       console.log(error.message);
@@ -89,20 +92,20 @@ exports.register = async (req, res) => {
   
   }
 
-  exports.resetPassword = async (req, res)=>{
+  exports.forgotPassword = async (req, res)=>{
     try{
         const { email } = req.body;
-        const checkEmail = await userModel.findOne({email})
+        const checkEmail = await donorModel.findOne({email})
         if(!checkEmail){
             return res.status(404).json({
                 message: 'Email not found'
             })
         }
-        const token = jwt.sign({id:checkEmail._id}, "secret_key", {expiresIn: '10min'})
-        const link = `${req.protocol}://${req.get('host')}/resetPassword/${checkEmail._id}/${token}`
+        const token = jwt.sign({id:checkEmail._id}, "secret_key", {expiresIn: '20min'})
+        const link = `${req.protocol}://${req.get('host')}/resetPassword/${token}`
         const subject = "Reset Password" + " " + checkEmail.fullName;
         const text = `Reset Password ${checkEmail.fullName}, kindly use this link to reset your password ${link} `;
-         sendMail({subject:subject, email:checkEmail.email, html:signup(link, checkEmail.fullName)})
+         sendMail({subject:subject, email:checkEmail.email, html:resetMail(link, checkEmail.fullName)})
          res.status(200).json({
             message: 'Reset password link sent successfully'
         })
@@ -118,16 +121,16 @@ exports.register = async (req, res) => {
 exports.resetNewPassword = async (req, res) =>{
     try{
         const {newPassword} = req.body;
-        const checkUser = await schoolModel.findById(req.params.id)
-        if(!checkUser){
+        const checkdonor = await donorModel.findById(req.params.id)
+        if(!checkdonor){
             return res.status(404).json({
-                message: 'User not found'
+                message: 'Donor not found'
             })
         }
         const salt = await bcrypt.genSaltSync(10);
         const hash = await bcrypt.hashSync(newPassword, salt);
        
-        await schoolModel.findByIdAndUpdate(req.params.id, {password:hash})
+        await donorModel.findByIdAndUpdate(req.params.id, {password:hash})
         
         res.status(200).json({
             message: 'Password change Successfully'
@@ -143,19 +146,19 @@ exports.resetNewPassword = async (req, res) =>{
 exports.changePassword = async (req, res) =>{
     try{
         const { id, newPassword } = req.body;
-        const checkSchool = await schoolModel.findById( id )
-        if(!checkSchool){
+        const checkdonor = await donorModel.findById( id )
+        if(!checkdonor){
             return res.status(404).json({
-                message: 'School not found'
+                message: 'Donor not found'
             })
         }
         
 
         const salt = await bcrypt.genSaltSync(10);
         const hashedPassword = await bcrypt.hashSync(newPassword, salt);
-        const findSchool = await schoolModel.findByIdAndUpdate(id, {password: hashedPassword})
+        const findDonor = await donorModel.findByIdAndUpdate(id, {password: hashedPassword})
         
-        if(!findSchool){
+        if(!findDonor){
             return res.status(400).json({
                 message: 'Failed to change password'
             })
@@ -166,7 +169,7 @@ exports.changePassword = async (req, res) =>{
         })
     }catch(error){
         res.status(500).json({
-            message: error.message
+            message: "internal server error" + error.message
         })
     }
 }
