@@ -166,11 +166,8 @@ router.patch('/forgot', forgotPassword);
  *             properties:
  *               newPassword:
  *                 type: string
-<<<<<<< HEAD
  *                 example: NewSecurePass123
-=======
  *                 example: NewPass@123
->>>>>>> origin/jtown
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -183,11 +180,8 @@ router.patch('/resetPassword/:token', resetNewPassword);
 
 /**
  * @swagger
-<<<<<<< HEAD
  * /change:
-=======
  * /donor/change:
->>>>>>> origin/jtown
  *   patch:
  *     summary: Change donor's password
  *     tags: [Donors]
