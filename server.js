@@ -21,9 +21,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: " LifeLink Blood Donor Documentation",
+      title: " LifeLink Blood Donor Documentation ",
       version: "1.0.0",
-      description: "API for managing blood donors",
+      description: " API for managing blood donors ",
       license: {
         name: "base:https://lifelink-7pau.onrender.com/api/v1",
       }
@@ -31,7 +31,7 @@ const swaggerOptions = {
     servers: [{ url: "https://lifelink-7pau.onrender.com/api/v1",
         description: 'production Server'
      },
-        {url: `http://localhost:${PORT}/api/v1`, 
+        {url: "http://localhost:"+ PORT, 
             description: 'Development server'
         }
     ],
