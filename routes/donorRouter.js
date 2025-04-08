@@ -9,17 +9,10 @@
 // router.patch('/change', changePassword);
 // router.get('/donors', getAllDonor)
 
-// module.exports = router;
+// module.exports = router; HEAD
 
 const router = require('express').Router();
-const {
-  register,
-  login,
-  resetNewPassword,
-  changePassword,
-  forgotPassword,
-  getAllDonor,
-} = require('../controller/donorController');
+const {  register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor, } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 
 /**
@@ -38,7 +31,13 @@ const { registerValidate } = require('../middleware/validate');
  *           type: string
  *           description: Donor's full name
  *         email:
+ *           type: string HEAD
+
+ *           description: Donor's email
+ *         password:
  *           type: string
+ *           description: Secure password
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *           description: Donor's email (e.g., LifeLink@theCurve.com)
  *         password:
  *           type: string
@@ -51,6 +50,11 @@ const { registerValidate } = require('../middleware/validate');
  *           description: Donor's location
  *       example:
  *         fullName: John Doe
+HEAD
+
+ *         email: johndoe@example.com
+ *         password: SecurePass123
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *         email: LifeLink@theCurve.com
  *         password: Curvedev123
  *         bloodType: O+
@@ -94,6 +98,13 @@ router.post('/donor/register', registerValidate, register);
  *             properties:
  *               email:
  *                 type: string
+ HEAD
+
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 example: SecurePass123
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *                 example: LifeLink@theCurve.com
  *               password:
  *                 type: string
@@ -102,7 +113,13 @@ router.post('/donor/register', registerValidate, register);
  *       200:
  *         description: Login successful, returns token
  *       400:
+<<<<<<< HEAD
  *         description: Missing email or password / Incorrect password
+=======
+ *         description: Incorrect email or password
+ *         description: Missing email or password / Incorrect password
+>>
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *       404:
  *         description: Donor not found
  *       500:
@@ -112,6 +129,10 @@ router.post('/donor/login', login);
 
 /**
  * @swagger
+<<<<<<< HEAD
+=======
+ * /forgot:
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  * /donor/forgot:
  *   patch:
  *     summary: Request password reset link
@@ -125,7 +146,13 @@ router.post('/donor/login', login);
  *             properties:
  *               email:
  *                 type: string
+<<<<<<< HEAD
  *                 example: LifeLink@theCurve.com
+=======
+ *                 example: johndoe@example.com
+ *                 example: LifeLink@theCurve.com
+>>>>>>> origin/jtown
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *     responses:
  *       200:
  *         description: Reset password link sent successfully
@@ -138,6 +165,10 @@ router.patch('/forgot', forgotPassword);
 
 /**
  * @swagger
+<<<<<<< HEAD
+=======
+ * /resetPassword/{token}:
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  * /donor/resetPassword/{token}:
  *   patch:
  *     summary: Reset password using a token
@@ -158,6 +189,10 @@ router.patch('/forgot', forgotPassword);
  *             properties:
  *               newPassword:
  *                 type: string
+<<<<<<< HEAD
+=======
+ *                 example: NewSecurePass123
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  *                 example: NewPass@123
  *     responses:
  *       200:
@@ -171,6 +206,10 @@ router.patch('/resetPassword/:token', resetNewPassword);
 
 /**
  * @swagger
+<<<<<<< HEAD
+=======
+ * /change:
+>>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
  * /donor/change:
  *   patch:
  *     summary: Change donor's password
