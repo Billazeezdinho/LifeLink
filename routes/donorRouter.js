@@ -27,7 +27,7 @@ const { registerValidate } = require('../middleware/validate');
  *         - location
  *       properties:
  *         fullName:
- *           type: string
+ *          type: string
  *           description: Donor's full name
  *         email:
  *           type: string
