@@ -1,17 +1,5 @@
-// const router = require('express').Router();
-// const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor } = require('../controller/donorController');
-// const { registerValidate } = require('../middleware/validate');
-
-// router.post('/donor/register', registerValidate, register);
-// router.post('/donor/login', login);
-// router.patch('/forgot', forgotPassword);
-// router.patch('/resetPassword/:token', resetNewPassword);
-// router.patch('/change', changePassword);
-// router.get('/donors', getAllDonor)
-
-// module.exports = router;
 const router = require('express').Router();
-const {  register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor, } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 
 /**
@@ -27,30 +15,24 @@ const { registerValidate } = require('../middleware/validate');
  *         - location
  *       properties:
  *         fullName:
- *          type: string
- *           description: Donor's full name
+ *           type: string
+ *           description: Donor's full name (e.g., John Doe)
  *         email:
  *           type: string
- *           description: Donor's email
+ *           description: Donor's email address (e.g., johndoe@example.com)
  *         password:
  *           type: string
- *           description: Secure password
- *           description: Donor's email (e.g., LifeLink@theCurve.com)
- *         password:
- *           type: string
- *           description: Secure password (e.g., Curvedev123)
+ *           description: Secure password for account protection (e.g., Curvedev123)
  *         bloodType:
  *           type: string
- *           description: Blood group (optional)
+ *           description: Blood group (optional, can be left empty)
  *         location:
  *           type: string
- *           description: Donor's location
+ *           description: Donor's geographical location (e.g., Lagos, Nigeria)
  *       example:
  *         fullName: John Doe
  *         email: johndoe@example.com
  *         password: SecurePass123
- *         email: LifeLink@theCurve.com
- *         password: Curvedev123
  *         bloodType: O+
  *         location: Lagos, Nigeria
  */
@@ -60,6 +42,7 @@ const { registerValidate } = require('../middleware/validate');
  * /donor/register:
  *   post:
  *     summary: Register a new donor
+ *     description: This endpoint allows new donors to register with the platform by providing their full name, email, password, and location. An email verification process will follow.
  *     tags: [Donors]
  *     requestBody:
  *       required: true
@@ -69,11 +52,11 @@ const { registerValidate } = require('../middleware/validate');
  *             $ref: '#/components/schemas/Donor'
  *     responses:
  *       201:
- *         description: Donor registered successfully
+ *         description: Donor successfully registered. A verification email is sent.
  *       400:
- *         description: Email already exists
+ *         description: Email is already registered.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, registration failed.
  */
 router.post('/donor/register', registerValidate, register);
 
@@ -81,7 +64,8 @@ router.post('/donor/register', registerValidate, register);
  * @swagger
  * /donor/login:
  *   post:
- *     summary: Login a donor
+ *     summary: Log in a donor to the platform
+ *     description: This endpoint allows registered donors to log in by providing their email and password. A valid token will be returned upon successful login.
  *     tags: [Donors]
  *     requestBody:
  *       required: true
@@ -96,30 +80,24 @@ router.post('/donor/register', registerValidate, register);
  *               password:
  *                 type: string
  *                 example: SecurePass123
- *                 example: LifeLink@theCurve.com
- *               password:
- *                 type: string
- *                 example: Curvedev123
  *     responses:
  *       200:
- *         description: Login successful, returns token
+ *         description: Login successful, returns authentication token.
  *       400:
- *         description: Incorrect email or password
- *         description: Missing email or password / Incorrect password
->>
+ *         description: Incorrect email or password provided.
  *       404:
- *         description: Donor not found
+ *         description: Donor not found with the provided email.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, login failed.
  */
 router.post('/donor/login', login);
 
 /**
  * @swagger
- * /forgot:
  * /donor/forgot:
  *   patch:
- *     summary: Request password reset link
+ *     summary: Request a password reset link
+ *     description: This endpoint allows donors to request a password reset by providing their registered email. If the email exists, a reset link will be sent.
  *     tags: [Donors]
  *     requestBody:
  *       required: true
@@ -131,24 +109,22 @@ router.post('/donor/login', login);
  *               email:
  *                 type: string
  *                 example: johndoe@example.com
- *                 example: LifeLink@theCurve.com
->>>>>>> origin/jtown
  *     responses:
  *       200:
- *         description: Reset password link sent successfully
+ *         description: Password reset link sent successfully to the provided email.
  *       404:
- *         description: Email not found
+ *         description: Email not found in the system.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, password reset link could not be sent.
  */
 router.patch('/forgot', forgotPassword);
 
 /**
  * @swagger
- * /resetPassword/{token}:
  * /donor/resetPassword/{token}:
  *   patch:
- *     summary: Reset password using a token
+ *     summary: Reset donor password using a token
+ *     description: This endpoint allows donors to reset their password by using a token received through the password reset email. The token must be valid for the password reset to be successful.
  *     tags: [Donors]
  *     parameters:
  *       - in: path
@@ -156,7 +132,7 @@ router.patch('/forgot', forgotPassword);
  *         required: true
  *         schema:
  *           type: string
- *         description: Reset password token
+ *         description: The password reset token that was sent to the donor's email.
  *     requestBody:
  *       required: true
  *       content:
@@ -167,23 +143,22 @@ router.patch('/forgot', forgotPassword);
  *               newPassword:
  *                 type: string
  *                 example: NewSecurePass123
- *                 example: NewPass@123
  *     responses:
  *       200:
- *         description: Password changed successfully
+ *         description: Password successfully reset.
  *       400:
- *         description: Invalid or expired token
+ *         description: Invalid or expired token.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, password reset failed.
  */
 router.patch('/resetPassword/:token', resetNewPassword);
 
 /**
  * @swagger
- * /change:
  * /donor/change:
  *   patch:
- *     summary: Change donor's password
+ *     summary: Change the donor's password
+ *     description: This endpoint allows an authenticated donor to change their password by providing their ID and the new password. The change is immediate upon success.
  *     tags: [Donors]
  *     requestBody:
  *       required: true
@@ -200,11 +175,11 @@ router.patch('/resetPassword/:token', resetNewPassword);
  *                 example: SecurePass456
  *     responses:
  *       200:
- *         description: Password changed successfully
+ *         description: Password successfully updated.
  *       400:
- *         description: Donor not found / Failed to change password
+ *         description: Donor not found or failed to update password.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, password change failed.
  */
 router.patch('/change', changePassword);
 
@@ -212,13 +187,14 @@ router.patch('/change', changePassword);
  * @swagger
  * /donors:
  *   get:
- *     summary: Get all donors
+ *     summary: Retrieve all donors
+ *     description: This endpoint allows admins to view all registered donors in the system, including their details such as name, email, and blood type.
  *     tags: [Donors]
  *     responses:
  *       200:
- *         description: List of all donors
+ *         description: A list of all donors.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, unable to fetch donor data.
  */
 router.get('/donors', getAllDonor);
 
