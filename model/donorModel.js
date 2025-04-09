@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 
 const donorSchema = new mongoose.Schema(
@@ -25,11 +26,45 @@ const donorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    age: {
+      type: String,
+      required: true,
+    
+    },
+    gender: {
+      type: String,
+      required: true,
+    },
+    profilePics: {
+      type: String
+    },
     status: {
       type: String,
       enum:['pending', 'accepted', 'declined'],
       default: 'pending'
     },
+    donations:[{
+      hospitalId: mongoose.Schema.Types.ObjectId,
+      date: Date,
+      status:{
+        type: string,
+        enum: ['pending', 'accepted', 'declined'],
+      default: 'pending'
+      },
+    },
+  ],
+    notifications:[{
+      message:{
+        type: String,
+        required: true
+       },
+      from:{
+        type: String
+      },
+      date:{
+        type: Date, default: Date.now
+      }
+    }],
     createdAt:{ 
       type: Date,
       default: Date.now
