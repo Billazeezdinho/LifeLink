@@ -1,8 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const hospitalModel = require("../model/hospitalModel");
+const hospitalModel = require("../models/hospitalModel");
 const donorModel = require("../model/donorModel");
 const adminModel  = require("../model/adminModel"); 
+const { resetMail } = require("../utils/resetMail"); 
+const { sendEmail } = require("../utils/sendEmail");
 require("dotenv").config();
 require("../utils/resetMail");
 
@@ -158,3 +160,68 @@ exports.verifyKYC = async (req, res) => {
     res.status(500).json({ message: 'Error approving KYC' });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const admin = await adminModel.findOne({ email: email.toLowerCase() });
+    if (!admin) {
+      return res.status(404).json({ message: 'Hospital not found' });
+    }
+
+    // Generate the password reset token
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Send the reset email
+    await sendEmail(email, 'Password Reset', `Click the link to reset your password: ${process.env.FRONTEND_URL}/reset-password/${token}`);
+
+    // Respond with the token for testing purposes
+    res.status(200).json({
+      message: 'Password reset link sent to your email',
+      token: token // Include the token in the response
+    });
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    res.status(500).json({ message: 'Error sending password reset email', error: error.message });
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Decode the token to get hospital ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const adminId = decoded.id;
+
+    // Find the hospital by ID
+    const admin = await adminModel.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the hospital's password
+    admin.password = hashedPassword;
+    await admin.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Error resetting password', error: error.message });
+  }
+};
+
+  
