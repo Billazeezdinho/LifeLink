@@ -89,7 +89,7 @@
       }
     }
 
-  exports.getAllDonor = async (req, res) =>{
+exports.getAllDonor = async (req, res) =>{
       try{
         const donors = await donorModel.find();
       res.status(200).json({
@@ -105,7 +105,6 @@
       }
     
     }
-
   exports.getOneDonorById = async (req, res)=>{
     try {
       const donor = await donorModel.findById(req.params.id);
