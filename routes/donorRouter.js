@@ -1,7 +1,9 @@
-const router = require('express').Router()
-
-const { register, login, getAllDonor, getOneDonorById, getDashboard, scheduleDonation, getDonationsByStatus, logOut, updateProfile, forgotPassword, resetNewPassword, changePassword, deleteDonor, viewHospitals, bookAppointment } = require('./controllers/donorController');
-
+const router = require("express").Router();
+const { register, login, getAllDonor, getOneDonorById, getDashboard, scheduleDonation, getDonationsByStatus, logOut, updateProfile, forgotPassword, resetNewPassword, changePassword, deleteDonor, viewHospitals, bookAppointment } = require("../controller/donorController");
+const auth = require("../middleware/authMiddleware");
+const { registerValidate } = require('../middleware/validate')
+const roleAuth = require("../middleware/authMiddleware");
+const upload = require('../utils/multer')
 /**
  * @swagger
  * tags:
@@ -44,7 +46,7 @@ const { register, login, getAllDonor, getOneDonorById, getDashboard, scheduleDon
  *       500:
  *         description: Internal server error
  */
-router.post('/register', register);
+router.post("/register", registerValidate, register);
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.post('/register', register);
  *       500:
  *         description: Internal server error
  */
-router.post('/login', login);
+router.post("/login", login);
 
 /**
  * @swagger
@@ -90,7 +92,7 @@ router.post('/login', login);
  *       500:
  *         description: Internal server error
  */
-router.get('/donors', getAllDonor);
+router.get("/donors", getAllDonor);
 
 /**
  * @swagger
@@ -112,7 +114,7 @@ router.get('/donors', getAllDonor);
  *       500:
  *         description: Internal server error
  */
-router.get('/donors/:id', getOneDonorById);
+router.get("/donors/:id", auth, roleAuth(["admin", "hospital"]), getOneDonorById);
 
 /**
  * @swagger
@@ -127,7 +129,7 @@ router.get('/donors/:id', getOneDonorById);
  *       500:
  *         description: Internal server error
  */
-router.get('/dashboard', getDashboard);
+router.get("/dashboard", auth ,getDashboard);
 
 /**
  * @swagger
@@ -156,7 +158,7 @@ router.get('/dashboard', getDashboard);
  *       500:
  *         description: Internal server error
  */
-router.post('/schedule', scheduleDonation);
+router.post("/schedule", auth, scheduleDonation);
 
 /**
  * @swagger
@@ -178,7 +180,7 @@ router.post('/schedule', scheduleDonation);
  *       500:
  *         description: Internal server error
  */
-router.get('/donations/:status', getDonationsByStatus);
+router.get("/donations/:status", auth, getDonationsByStatus);
 
 /**
  * @swagger
@@ -193,7 +195,7 @@ router.get('/donations/:status', getDonationsByStatus);
  *       500:
  *         description: Internal server error
  */
-router.post('/logout', logOut);
+router.post("/logout", auth, logOut);
 
 /**
  * @swagger
@@ -222,7 +224,7 @@ router.post('/logout', logOut);
  *       500:
  *         description: Internal server error
  */
-router.put('/profile', updateProfile);
+router.put("/profile", auth, upload.single("profilePics"), updateProfile);
 
 /**
  * @swagger
@@ -249,7 +251,7 @@ router.put('/profile', updateProfile);
  *       500:
  *         description: Internal server error
  */
-router.post('/forgotPassword', forgotPassword);
+router.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
@@ -280,7 +282,7 @@ router.post('/forgotPassword', forgotPassword);
  *       500:
  *         description: Internal server error
  */
-router.post('/resetPassword/:id', resetNewPassword);
+router.post("/resetPassword/:id", resetNewPassword);
 
 /**
  * @swagger
@@ -307,7 +309,7 @@ router.post('/resetPassword/:id', resetNewPassword);
  *       500:
  *         description: Internal server error
  */
-router.put('/changePassword', changePassword);
+router.put("/changePassword", changePassword);
 
 /**
  * @swagger
@@ -329,7 +331,7 @@ router.put('/changePassword', changePassword);
  *       500:
  *         description: Internal server error
  */
-router.delete('/deleteDonor/:id', deleteDonor);
+router.delete("/deleteDonor/:id", auth, roleAuth([ "admin" ]), deleteDonor);
 
 /**
  * @swagger
@@ -344,7 +346,7 @@ router.delete('/deleteDonor/:id', deleteDonor);
  *       500:
  *         description: Internal server error
  */
-router.get('/hospitals', viewHospitals);
+router.get("/hospitals", viewHospitals);
 
 /**
  * @swagger
@@ -373,6 +375,6 @@ router.get('/hospitals', viewHospitals);
  *       500:
  *         description: Internal server error
  */
-router.post('/bookAppointment', bookAppointment);
+router.post("/bookAppointment", bookAppointment);
 
 module.exports = router;

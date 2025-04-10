@@ -4,6 +4,7 @@
   const resetMail = require("../utils/resetMail");
   const sendMail = require("../utils/email");
   const cloudinary = require('cloudinary');
+  const welcomeMail = require('../utils/welcome')
 
   const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
@@ -32,8 +33,15 @@
           location, 
           age
         });
-        await donor.save();
-
+        
+        const firstName = user.fullName.split(" ")[0];
+        const mailDetails = {
+        email: user.email,
+        subject: "Welcome to LIFELINK",
+        html: welcomeMail(firstName),
+      };
+      await donor.save();
+      await sendMail(mailDetails);
         res.status(201).json({
           message: "Donor created successfully",
           data: donor,

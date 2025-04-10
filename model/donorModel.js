@@ -47,7 +47,7 @@ const donorSchema = new mongoose.Schema(
       hospitalId: mongoose.Schema.Types.ObjectId,
       date: Date,
       status:{
-        type: string,
+        type: String,
         enum: ['pending', 'accepted', 'declined'],
       default: 'pending'
       },
