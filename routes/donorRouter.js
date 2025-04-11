@@ -1,23 +1,9 @@
-<<<<<<< HEAD
-// const router = require('express').Router();
-// const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor } = require('../controller/donorController');
-// const { registerValidate } = require('../middleware/validate');
-
-// router.post('/donor/register', registerValidate, register);
-// router.post('/donor/login', login);
-// router.patch('/forgot', forgotPassword);
-// router.patch('/resetPassword/:token', resetNewPassword);
-// router.patch('/change', changePassword);
-// router.get('/donors', getAllDonor)
-
-// module.exports = router; HEAD
-
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
-
+const auth = require('../middleware/authMiddleware');
+const upload= require('../utils/multer');
+const roleAuth =require('../middleware/authMiddleware')
 /**
  * @swagger
  * components:
@@ -34,25 +20,11 @@ const { registerValidate } = require('../middleware/validate');
  *           type: string
  *           description: Donor's full name (e.g., John Doe)
  *         email:
-<<<<<<< HEAD
- *           type: string HEAD
-
- *           description: Donor's email
- *         password:
- *           type: string
- *           description: Secure password
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
- *           description: Donor's email (e.g., LifeLink@theCurve.com)
- *         password:
- *           type: string
- *           description: Secure password (e.g., Curvedev123)
-=======
  *           type: string
  *           description: Donor's email address (e.g., johndoe@example.com)
  *         password:
  *           type: string
  *           description: Secure password for account protection (e.g., Curvedev123)
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  *         bloodType:
  *           type: string
  *           description: Blood group (optional, can be left empty)
@@ -61,46 +33,52 @@ const { registerValidate } = require('../middleware/validate');
  *           description: Donor's geographical location (e.g., Lagos, Nigeria)
  *       example:
  *         fullName: John Doe
-HEAD
-
  *         email: johndoe@example.com
  *         password: SecurePass123
-<<<<<<< HEAD
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
- *         email: LifeLink@theCurve.com
- *         password: Curvedev123
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  *         bloodType: O+
  *         location: Lagos, Nigeria
  */
 
 /**
  * @swagger
- * /donor/register:
+ * /register:
  *   post:
  *     summary: Register a new donor
- *     description: This endpoint allows new donors to register with the platform by providing their full name, email, password, and location. An email verification process will follow.
- *     tags: [Donors]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Donor'
+ *     tags: [Donor]
+ *     description: Register a new donor with full name, email, password, blood type, location, and age.
+ *     parameters:
+ *       - in: body
+ *         name: donor
+ *         description: Donor registration details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             fullName:
+ *               type: string
+ *             email:
+ *               type: string
+ *             password:
+ *               type: string
+ *             bloodType:
+ *               type: string
+ *             location:
+ *               type: string
+ *             age:
+ *               type: number
  *     responses:
  *       201:
- *         description: Donor successfully registered. A verification email is sent.
+ *         description: Donor created successfully
  *       400:
- *         description: Email is already registered.
+ *         description: Email already exists
  *       500:
- *         description: Internal Server Error, registration failed.
+ *         description: Internal server error
  */
-router.post('/donor/register', registerValidate, register);
+router.post("/register", registerValidate, register);
 
 /**
  * @swagger
- * /donor/login:
+ * /login:
  *   post:
  *     summary: Log in a donor to the platform
  *     description: This endpoint allows registered donors to log in by providing their email and password. A valid token will be returned upon successful login.
@@ -114,51 +92,96 @@ router.post('/donor/register', registerValidate, register);
  *             properties:
  *               email:
  *                 type: string
- HEAD
-
  *                 example: johndoe@example.com
  *               password:
  *                 type: string
  *                 example: SecurePass123
-<<<<<<< HEAD
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
- *                 example: LifeLink@theCurve.com
- *               password:
- *                 type: string
- *                 example: Curvedev123
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  *     responses:
  *       200:
- *         description: Login successful, returns authentication token.
- *       400:
-<<<<<<< HEAD
-<<<<<<< HEAD
- *         description: Missing email or password / Incorrect password
-=======
- *         description: Incorrect email or password
- *         description: Missing email or password / Incorrect password
->>
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
-=======
- *         description: Incorrect email or password provided.
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
- *       404:
- *         description: Donor not found with the provided email.
+ *         description: Dashboard data retrieved
  *       500:
- *         description: Internal Server Error, login failed.
+ *         description: Internal server error
  */
-router.post('/donor/login', login);
+router.get("/dashboard", auth ,getDashboard);
 
 /**
  * @swagger
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
- * /forgot:
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
+ * /schedule:
+ *   post:
+ *     summary: Schedule a donation
+ *     tags: [Donor]
+ *     description: Schedule a donation appointment with a date and hospital ID.
+ *     parameters:
+ *       - in: body
+ *         name: appointment
+ *         description: Donation appointment details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             date:
+ *               type: string
+ *             hospitalId:
+ *               type: string
+ *     responses:
+ *       201:
+ *         description: Donation scheduled successfully
+ *       400:
+ *         description: Incorrect email or password provided.
+ *       404:
+ *         description: No donations found with the given status
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/donations/:status", auth, getDonationsByStatus);
+
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Log out a donor
+ *     tags: [Donor]
+ *     description: Log out the currently logged-in donor.
+ *     responses:
+ *       200:
+ *         description: Donor logged out successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/logout", auth,logOut );
+
+
+/**
+ * @swagger
+ * /profile:
+ *   put:
+ *     summary: Update donor profile
+ *     tags: [Donor]
+ *     description: Update donor's profile information, including profile picture.
+ *     parameters:
+ *       - in: body
+ *         name: donor
+ *         description: Donor profile update details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             fullName:
+ *               type: string
+ *             location:
+ *               type: string
+ *             age:
+ *               type: number
+ *     responses:
+ *       201:
+ *         description: Profile updated successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/profile", auth, upload.single("profilePics"), updateProfile);
+
+/**
+ * @swagger
  * /donor/forgot:
  *   patch:
  *     summary: Request a password reset link
@@ -173,35 +196,19 @@ router.post('/donor/login', login);
  *             properties:
  *               email:
  *                 type: string
-<<<<<<< HEAD
- *                 example: LifeLink@theCurve.com
-=======
  *                 example: johndoe@example.com
-<<<<<<< HEAD
- *                 example: LifeLink@theCurve.com
->>>>>>> origin/jtown
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  *     responses:
  *       200:
- *         description: Password reset link sent successfully to the provided email.
+ *         description: Reset password link sent successfully
  *       404:
- *         description: Email not found in the system.
+ *         description: Email not found
  *       500:
- *         description: Internal Server Error, password reset link could not be sent.
+ *         description: Internal server error
  */
-router.patch('/forgot', forgotPassword);
+router.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
- * /resetPassword/{token}:
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  * /donor/resetPassword/{token}:
  *   patch:
  *     summary: Reset donor password using a token
@@ -209,7 +216,39 @@ router.patch('/forgot', forgotPassword);
  *     tags: [Donors]
  *     parameters:
  *       - in: path
- *         name: token
+ *         name: id
+ *         required: true
+ *         description: Donor ID
+ *       - in: body
+ *         name: newPassword
+ *         description: New password for the donor
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             newPassword:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       404:
+ *         description: Donor not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/resetPassword/:id", resetNewPassword);
+
+/**
+ * @swagger
+ * /changePassword:
+ *   put:
+ *     summary: Change password
+ *     tags: [Donor]
+ *     description: Change the donor's password.
+ *     parameters:
+ *       - in: body
+ *         name: password
+ *         description: Donor's new password
  *         required: true
  *         schema:
  *           type: string
@@ -223,33 +262,19 @@ router.patch('/forgot', forgotPassword);
  *             properties:
  *               newPassword:
  *                 type: string
-<<<<<<< HEAD
-=======
  *                 example: NewSecurePass123
-<<<<<<< HEAD
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
- *                 example: NewPass@123
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  *     responses:
  *       200:
- *         description: Password successfully reset.
- *       400:
- *         description: Invalid or expired token.
+ *         description: Password changed successfully
+ *       404:
+ *         description: Donor not found
  *       500:
- *         description: Internal Server Error, password reset failed.
+ *         description: Internal server error
  */
-router.patch('/resetPassword/:token', resetNewPassword);
+router.put("/changePassword", changePassword);
 
 /**
  * @swagger
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
- * /change:
->>>>>>> 9b3cdf57446b8ef98c8d68cc5dc6f22f949dc09a
-=======
->>>>>>> dbb9b3fd7672faa81050955d2d918faee0aed043
  * /donor/change:
  *   patch:
  *     summary: Change the donor's password
@@ -270,27 +295,56 @@ router.patch('/resetPassword/:token', resetNewPassword);
  *                 example: SecurePass456
  *     responses:
  *       200:
- *         description: Password successfully updated.
- *       400:
- *         description: Donor not found or failed to update password.
+ *         description: Donor deleted successfully
+ *       404:
+ *         description: Donor not found
  *       500:
- *         description: Internal Server Error, password change failed.
+ *         description: Internal server error
  */
-router.patch('/change', changePassword);
+router.delete("/deleteDonor/:id", auth, roleAuth([ "admin" ]), deleteDonor);
 
 /**
  * @swagger
- * /donors:
+ * /hospitals:
  *   get:
- *     summary: Retrieve all donors
- *     description: This endpoint allows admins to view all registered donors in the system, including their details such as name, email, and blood type.
- *     tags: [Donors]
+ *     summary: Get list of hospitals
+ *     tags: [Donor]
+ *     description: Retrieve all hospitals.
  *     responses:
  *       200:
- *         description: A list of all donors.
+ *         description: List of hospitals
  *       500:
- *         description: Internal Server Error, unable to fetch donor data.
+ *         description: Internal server error
  */
-router.get('/donors', getAllDonor);
+router.get("/hospitals", viewHospitals);
+
+/**
+ * @swagger
+ * /bookAppointment:
+ *   post:
+ *     summary: Book an appointment with a hospital
+ *     tags: [Donor]
+ *     description: Book an appointment with a selected hospital.
+ *     parameters:
+ *       - in: body
+ *         name: appointment
+ *         description: Appointment booking details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hospitalId:
+ *               type: string
+ *             date:
+ *               type: string
+ *             time:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Appointment booked successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/bookAppointment", bookAppointment);
 
 module.exports = router;

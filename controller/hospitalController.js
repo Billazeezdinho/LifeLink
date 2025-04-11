@@ -1,16 +1,15 @@
-const donorModel  = require("../models/donorModel"); 
-const  hospitalModel  = require("../models/hospitalModel"); 
+const donorModel  = require("../model/donorModel"); 
+const  hospitalModel  = require("../model/hospitalModel"); 
 const bcrypt = require("bcrypt"); 
 const jwt = require("jsonwebtoken"); 
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
 require("dotenv").config(); 
-const Appointment = require("../models/appointmentModel");
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' }); 
-const cloudinary = require('../config/cloudinaryConfig');
+const cloudinary = require('../config/cloudinary');
 
 
 exports.register =async (req, res) => {

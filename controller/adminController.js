@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const hospitalModel = require("../models/hospitalModel");
+const hospitalModel = require("../model/hospitalModel");
 const donorModel = require("../model/donorModel");
 const adminModel  = require("../model/adminModel"); 
 const { resetMail } = require("../utils/resetMail"); 
