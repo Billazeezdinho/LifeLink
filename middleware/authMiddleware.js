@@ -26,8 +26,9 @@ const adminModel = require('../model/adminModel');
       req.user = user;
       next();
     } catch (error) {
+      console.log(error.message)
       res.status(401).json({ 
-      message: "Authentication failed", error
+      message: "Authentication failed", error,message
     });
     }
   };

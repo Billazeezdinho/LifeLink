@@ -6,11 +6,11 @@
   const cloudinary = require('cloudinary');
   const welcomeMail = require('../utils/welcome')
 
-  const generatedToken = (id) => {
+const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
   }
 
-  exports.register = async (req, res) => {
+exports.register = async (req, res) => {
       try {
         //Extract required data from request body
         const { fullName, email, password, bloodType, location, age  } = req.body;
@@ -34,9 +34,9 @@
           age
         });
         
-        const firstName = user.fullName.split(" ")[0];
+        const firstName = donor.fullName.split(" ")[0];
         const mailDetails = {
-        email: user.email,
+        email: donor.email,
         subject: "Welcome to LIFELINK",
         html: welcomeMail(firstName),
       };
@@ -54,7 +54,7 @@
       }
     };
 
-  exports.login = async (req, res)=>{
+exports.login = async (req, res)=>{
       try{
         const {email, password} = req.body;
         if(email == undefined || password == undefined){
@@ -94,7 +94,8 @@ exports.getAllDonor = async (req, res) =>{
         const donors = await donorModel.find();
       res.status(200).json({
         message: "All Donor's in the database",
-        data: donors
+        data: donors,
+        total: donors.length
       })}
       catch(error){
         console.log(error.message);
@@ -126,14 +127,17 @@ exports.getAllDonor = async (req, res) =>{
       
     }
   }
-  exports.getDashboard = async (res, req) => {
+exports.getDashboard = async (req, res) => {
     try {
       const token =generatedToken(req.user._id);
+      console.log(token)
       if (!token){
         return res.status(400).json({
           message: 'unable to generate token'
         });
       }
+      console.log(req.user);
+      
       res.status(200).json({
         message: req.user,
         token
@@ -143,7 +147,7 @@ exports.getAllDonor = async (req, res) =>{
         message: 'Internal Server Error' + error.message 
       })
     }
-  }
+}
   exports.scheduleDonation = async (req, res)=> {
     try {
       const {date, hospitalId} = req.body;

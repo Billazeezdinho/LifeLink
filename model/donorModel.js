@@ -33,7 +33,6 @@ const donorSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      required: true,
     },
     profilePics: {
       type: String
@@ -55,8 +54,7 @@ const donorSchema = new mongoose.Schema(
   ],
     notifications:[{
       message:{
-        type: String,
-        required: true
+        type: String
        },
       from:{
         type: String
