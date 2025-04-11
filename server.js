@@ -58,13 +58,3 @@ app.listen(PORT, ()=>{
     console.log(`Server is listening to PORT: ${PORT}`);
     console.log(`Swagger docs available at https://lifelink-7pau.onrender.com/api-docs`);
 })
-
-
-
-
-
-
-
-
-
-
