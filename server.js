@@ -59,6 +59,7 @@ app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, ()=>{
     console.log(`Server is listening to PORT: ${PORT}`);
+
     console.log(`Swagger docs available at https://hotel-api-svnc.onrender.com/api-docs`);
 })
 
@@ -99,6 +100,7 @@ app.listen(PORT, ()=>{
 
 // app.listen(process.env.PORT, () => {
 //   console.log(`Server is running on port ${process.env.PORT}`);
-// });
-// =======
-// >>>>>>> 147676995a26830e747e50c0988bef56bd267917
+// // >>>>>>> 147676995a26830e747e50c0988bef56bd267917
+
+    console.log(`Swagger docs available at https://lifelink-7pau.onrender.com/api-docs`);
+
