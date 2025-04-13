@@ -71,4 +71,7 @@ const donorSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-exports.donorModel = mongoose.model("Donors", donorSchema)
+const donorModel = mongoose.model("Donors", donorSchema);
+module.exports = donorModel;
+
+// exports.donorModel = mongoose.model("Donors", donorSchema)

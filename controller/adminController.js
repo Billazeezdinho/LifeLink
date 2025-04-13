@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const hospitalModel = require("../model/hospitalModel");
@@ -5,6 +6,7 @@ const donorModel = require("../model/donorModel");
 const adminModel  = require("../model/adminModel"); 
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
+const KYC = require('../model/kycModel');
 require("dotenv").config();
 require("../utils/resetMail");
 
@@ -144,20 +146,99 @@ catch (err) {
 }
 
 
+exports.approveKYC = async (req, res) => { 
+  try {
+    const { kycId } = req.params;
+    console.log("Incoming KYC ID:", kycId);
 
-exports.verifyKYC = async (req, res) => {
-  const { userId } = req.params;
+    // Find the KYC document
+    const kyc = await KYC.findById(kycId);
+    if (!kyc) {
+      console.log("KYC not found");
+      return res.status(404).json({ message: "KYC not found" });
+    }
+    console.log("KYC hospital ID:", kyc.hospital);
+    console.log(" KYC found:", kyc);
+
+    // Check if KYC is already approved or declined
+    if (kyc.status === 'approved' || kyc.status === 'declined') {
+      return res.status(400).json({ message: 'KYC has already been processed.' });
+    }
+
+    // Find the associated hospital using kyc.hospital
+    const hospital = await hospitalModel.findById(kyc.hospital);
+    if (!hospital) {
+      console.log("Hospital not found for KYC:", kyc.hospital);
+      console.log(" Hospital not found");
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+
+    console.log(" Hospital found:", hospital);
+
+    // Update the KYC document status to "approved"
+    kyc.status = "approved";
+    await kyc.save();
+
+    // Update the hospital's kycVerified field to true
+    hospital.kycVerified = true;
+    await hospital.save();
+
+    console.log(" KYC approved and hospital verified");
+
+    return res.status(200).json({ message: "KYC approved successfully" });
+
+  } catch (error) {
+    console.error(" Error in approveKYC:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+exports.declineKYC = async (req, res) => { 
+  const { kycId } = req.params;  // Access the kycId from the route parameter
+  console.log("Decline KYC hit with ID:", kycId);
 
   try {
-    const user = await hospital.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    // Find the KYC document by the given kycId
+    const kycDocument = await KYC.findById(kycId); // Use kycId here to find the document
+    console.log('KYC Document:', kycDocument);
 
-    user.isKYCVerified = true;
-    await user.save();
+    if (!kycDocument) {
+      return res.status(404).json({ message: 'KYC document not found' });
+    }
 
-    res.status(200).json({ message: 'KYC approved' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error approving KYC' });
+    // Allow decline for both approved and pending KYC statuses
+    if (kycDocument.status !== 'approved' && kycDocument.status !== 'pending') {
+      return res.status(400).json({ message: 'Cannot decline KYC in its current state' });
+    }
+
+    // Log the hospital ID in the KYC document
+    console.log('Hospital ID in KYC:', kycDocument.hospital);
+
+    // Update KYC status to declined
+    kycDocument.status = 'declined';
+    await kycDocument.save();
+    console.log('kycDocument.hospital:', kycDocument.hospital);
+
+    // Update the hospital's KYC verification flag
+    const hospital = await hospitalModel.findById(kycDocument.hospital); // kycDocument.hospital should have the hospitalId
+    console.log('Hospital:', hospital);
+
+    if (!hospital) {
+      return res.status(404).json({ message: 'Hospital not found' });
+    }
+
+    hospital.kycVerified = false;
+    await hospital.save();
+
+    res.status(200).json({
+      message: 'KYC declined successfully',
+      kyc: kycDocument,
+    });
+
+  } catch (error) {
+    console.error('Error declining KYC:', error);
+    res.status(500).json({ message: 'Error declining KYC', error: error.message });
   }
 };
 

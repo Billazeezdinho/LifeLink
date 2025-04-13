@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
-const auth = require('../middleware/authMiddleware');
+const {auth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
-const roleAuth =require('../middleware/authMiddleware')
+// const roleAuth =require('../middleware/authMiddleware')
 /**
  * @swagger
  * components:
@@ -148,7 +148,7 @@ router.get("/donations/:status", auth, getDonationsByStatus);
  *       500:
  *         description: Internal server error
  */
-router.post("/logout", auth,logOut );
+router.post("/logout", auth, logOut );
 
 
 /**
@@ -236,7 +236,8 @@ router.post("/forgotPassword", forgotPassword);
  *       500:
  *         description: Internal server error
  */
-router.post("/resetPassword/:id", resetNewPassword);
+// router.post("/resetPassword/:id", resetNewPassword);
+router.post("/resetPassword", resetNewPassword);
 
 /**
  * @swagger
@@ -271,7 +272,9 @@ router.post("/resetPassword/:id", resetNewPassword);
  *       500:
  *         description: Internal server error
  */
-router.put("/changePassword", changePassword);
+// router.put("/changePassword", changePassword);
+router.put("/changePassword", auth, changePassword);
+
 
 /**
  * @swagger
@@ -301,7 +304,7 @@ router.put("/changePassword", changePassword);
  *       500:
  *         description: Internal server error
  */
-router.delete("/deleteDonor/:id", auth, roleAuth([ "admin" ]), deleteDonor);
+router.delete("/deleteDonor/:id", auth,  deleteDonor);
 
 /**
  * @swagger
