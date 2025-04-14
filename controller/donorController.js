@@ -156,7 +156,7 @@ exports.getDashboard = async (req, res) => {
           message: 'Date and hospital are required'
         })
       }
-      const updated = await donorModel.findByIdAndUpdate(req.donor._id, { status: 'pending'}, {new: true});
+      const updated = await donorModel.findByIdAndUpdate(req.user._id, { status: 'pending'}, {new: true});
       const token = generatedToken(updated._id);
       res.status(201).json({
         message: "donation appointment scheduled",
@@ -211,7 +211,7 @@ exports.getDashboard = async (req, res) => {
       })
     }
   }
-  exports.updateProfile= async (req, res)=>{
+exports.updateProfile= async (req, res)=>{
     try {
       const updateFields = req.body;
       if(req.file){
@@ -238,7 +238,7 @@ exports.getDashboard = async (req, res) => {
       
     }
   }
-  exports.forgotPassword = async (req, res)=>{
+exports.forgotPassword = async (req, res)=>{
       try{
           const { email } = req.body;
           const checkEmail = await donorModel.findOne({email})
@@ -318,23 +318,6 @@ exports.getDashboard = async (req, res) => {
           })
       }
   }
-  exports.deleteDonor = async (req, res) =>{
-    try {
-      const donor = await donorModel.findByIdAndDelete(req.params.id);
-      if(!donor) {
-        return res.status(404).json({
-          message: 'Donor not found'
-        })
-      } res.status(200).json({
-        message: 'Donor Deleted successfully'
-      });
-    } catch (error) {
-      res.status(500).json({
-        message:'Internal Server Error' + error.message
-      })
-      
-    }
-  }
   exports.viewHospitals = async (req, res) => {
     try {
       // Fetch hospitals list
@@ -370,7 +353,7 @@ exports.getDashboard = async (req, res) => {
     }
   };
 
-  exports.deleteDonor = async (req, res) => {
+exports.deleteDonor = async (req, res) => {
     try {
       const donor = await donorModel.findByIdAndDelete(req.params.id);
       if(!donor){

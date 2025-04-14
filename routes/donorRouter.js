@@ -1,42 +1,13 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
-const {auth} = require('../middleware/authMiddleware');
+const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
-// const roleAuth =require('../middleware/authMiddleware')
 /**
  * @swagger
- * components:
- *   schemas:
- *     Donor:
- *       type: object
- *       required:
- *         - fullName
- *         - email
- *         - password
- *         - location
- *       properties:
- *         fullName:
- *           type: string
- *           description: Donor's full name (e.g., John Doe)
- *         email:
- *           type: string
- *           description: Donor's email address (e.g., johndoe@example.com)
- *         password:
- *           type: string
- *           description: Secure password for account protection (e.g., Curvedev123)
- *         bloodType:
- *           type: string
- *           description: Blood group (optional, can be left empty)
- *         location:
- *           type: string
- *           description: Donor's geographical location (e.g., Lagos, Nigeria)
- *       example:
- *         fullName: John Doe
- *         email: johndoe@example.com
- *         password: SecurePass123
- *         bloodType: O+
- *         location: Lagos, Nigeria
+ * tags:
+ *   - name: Donor
+ *     description: Operations for Donors
  */
 
 /**
@@ -80,22 +51,77 @@ router.post("/register", registerValidate, register);
  * @swagger
  * /login:
  *   post:
- *     summary: Log in a donor to the platform
- *     description: This endpoint allows registered donors to log in by providing their email and password. A valid token will be returned upon successful login.
- *     tags: [Donors]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@example.com
- *               password:
- *                 type: string
- *                 example: SecurePass123
+ *     summary: Log in an existing donor
+ *     tags: [Donor]
+ *     description: Login a donor using email and password.
+ *     parameters:
+ *       - in: body
+ *         name: donor
+ *         description: Donor login details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *             password:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Logged in successfully
+ *       400:
+ *         description: Incorrect password
+ *       404:
+ *         description: Donor not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/login", login);
+
+/**
+ * @swagger
+ * /donors:
+ *   get:
+ *     summary: Get all donors
+ *     tags: [Donor]
+ *     description: Retrieve all donors from the database.
+ *     responses:
+ *       200:
+ *         description: List of all donors
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/donors", getAllDonor);
+
+/**
+ * @swagger
+ * /donors/{id}:
+ *   get:
+ *     summary: Get a donor by ID
+ *     tags: [Donor]
+ *     description: Retrieve a donor's details by their unique ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Donor ID
+ *     responses:
+ *       200:
+ *         description: Donor details retrieved
+ *       404:
+ *         description: Donor not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/donors/:id", auth, roleAuth(["admin", "hospital"]), getOneDonorById);
+
+/**
+ * @swagger
+ * /dashboard:
+ *   get:
+ *     summary: Get donor dashboard
+ *     tags: [Donor]
+ *     description: Retrieve the donor's dashboard information, including their profile.
  *     responses:
  *       200:
  *         description: Dashboard data retrieved
@@ -127,7 +153,27 @@ router.get("/dashboard", auth ,getDashboard);
  *       201:
  *         description: Donation scheduled successfully
  *       400:
- *         description: Incorrect email or password provided.
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/schedule", auth, scheduleDonation);
+
+/**
+ * @swagger
+ * /donations/{status}:
+ *   get:
+ *     summary: Get donations by status
+ *     tags: [Donor]
+ *     description: Retrieve a donor's donations filtered by status (e.g., pending, completed).
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         description: Status of the donation (pending, completed, etc.)
+ *     responses:
+ *       200:
+ *         description: Donations found with the specified status
  *       404:
  *         description: No donations found with the given status
  *       500:
@@ -148,8 +194,7 @@ router.get("/donations/:status", auth, getDonationsByStatus);
  *       500:
  *         description: Internal server error
  */
-router.post("/logout", auth, logOut );
-
+router.post("/logout", auth, logOut);
 
 /**
  * @swagger
@@ -182,21 +227,21 @@ router.put("/profile", auth, upload.single("profilePics"), updateProfile);
 
 /**
  * @swagger
- * /donor/forgot:
- *   patch:
- *     summary: Request a password reset link
- *     description: This endpoint allows donors to request a password reset by providing their registered email. If the email exists, a reset link will be sent.
- *     tags: [Donors]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@example.com
+ * /forgotPassword:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Donor]
+ *     description: Send a password reset link to the donor's email.
+ *     parameters:
+ *       - in: body
+ *         name: email
+ *         description: Donor email address
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
  *     responses:
  *       200:
  *         description: Reset password link sent successfully
@@ -209,11 +254,11 @@ router.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
- * /donor/resetPassword/{token}:
- *   patch:
- *     summary: Reset donor password using a token
- *     description: This endpoint allows donors to reset their password by using a token received through the password reset email. The token must be valid for the password reset to be successful.
- *     tags: [Donors]
+ * /resetPassword/{id}:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Donor]
+ *     description: Reset donor's password using a token and new password.
  *     parameters:
  *       - in: path
  *         name: id
@@ -236,8 +281,7 @@ router.post("/forgotPassword", forgotPassword);
  *       500:
  *         description: Internal server error
  */
-// router.post("/resetPassword/:id", resetNewPassword);
-router.post("/resetPassword", resetNewPassword);
+router.post("/resetPassword/:id", resetNewPassword);
 
 /**
  * @swagger
@@ -252,18 +296,10 @@ router.post("/resetPassword", resetNewPassword);
  *         description: Donor's new password
  *         required: true
  *         schema:
- *           type: string
- *         description: The password reset token that was sent to the donor's email.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               newPassword:
- *                 type: string
- *                 example: NewSecurePass123
+ *           type: object
+ *           properties:
+ *             newPassword:
+ *               type: string
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -272,30 +308,20 @@ router.post("/resetPassword", resetNewPassword);
  *       500:
  *         description: Internal server error
  */
-// router.put("/changePassword", changePassword);
-router.put("/changePassword", auth, changePassword);
-
+router.put("/changePassword", changePassword);
 
 /**
  * @swagger
- * /donor/change:
- *   patch:
- *     summary: Change the donor's password
- *     description: This endpoint allows an authenticated donor to change their password by providing their ID and the new password. The change is immediate upon success.
- *     tags: [Donors]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               id:
- *                 type: string
- *                 example: 661b2fdc64c1f1f8a1a2d3e5
- *               newPassword:
- *                 type: string
- *                 example: SecurePass456
+ * /deleteDonor/{id}:
+ *   delete:
+ *     summary: Delete a donor
+ *     tags: [Donor]
+ *     description: Delete a donor from the system by their ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Donor ID
  *     responses:
  *       200:
  *         description: Donor deleted successfully
@@ -304,7 +330,7 @@ router.put("/changePassword", auth, changePassword);
  *       500:
  *         description: Internal server error
  */
-router.delete("/deleteDonor/:id", auth,  deleteDonor);
+router.delete("/deleteDonor/:id", auth, roleAuth([ "admin" ]), deleteDonor);
 
 /**
  * @swagger

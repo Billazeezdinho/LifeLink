@@ -1,86 +1,66 @@
 const jwt = require("jsonwebtoken");
-const donorModel = require("../model/donorModel");
-const hospitalModel = require("../model/hospitalModel");
-const adminModel = require("../model/adminModel");
+const { donorModel } = require("../model/donorModel");
+const hospitalModel = require('../model/hospitalModel'); 
+const adminModel = require('../model/adminModel');
 
 const blacklistedTokens = new Set();
 
 const auth = async (req, res, next) => {
   try {
+    // Extract token from Authorization header
     const token = req.headers.authorization?.split(" ")[1];
-
+    
+    // Check if token exists
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
-
+    
+    // Check if token is blacklisted
     if (blacklistedTokens.has(token)) {
-      return res.status(401).json({ message: "Token has been invalidated. Please log in again." });
+      return res.status(401).json({ message: "Token has invalid. Please log in again." });
     }
-    console.log("JWT_SECRET:", process.env.key)
-    const decoded = jwt.verify(token, process.env.key);
+    
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.key); // Use a more descriptive variable name for the secret
+    let user;
 
-    // Try to find user in all models
-    const donor = await donorModel.findById(decoded.id || decoded._id);
-    const hospital = await hospitalModel.findById(decoded.id || decoded._id);
-    const admin = await adminModel.findById(decoded.id || decoded._id);
+    // Check which model the user belongs to (donor, hospital, or admin)
+    user = (await donorModel.findById(decoded.id)) || 
+           (await hospitalModel.findById(decoded.id)) || 
+           (await adminModel.findById(decoded.id));
 
-    if (!donor && !hospital && !admin) {
+    // If user is not found
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Prepare the user object
-    if (donor) {
-      req.user = {
-        id: donor._id,
-        email: donor.email,
-        name: donor.fullName || null,
-        role: "donor",
-      };
-    } else if (hospital) {
-      req.user = {
-        id: hospital._id,
-        hospitalId: hospital._id,
-        email: hospital.email,
-        name: hospital.name || null,
-        role: "hospital",
-        isKycVerified: hospital.kycVerified || false,
-      };
-    } else if (admin) {
-      req.user = {
-        id: admin._id,
-        email: admin.email,
-        role: "admin",
-      };
-    }
-
-    // Optional: If accessing admin route and not admin
-    if (req.originalUrl.startsWith("/admin") && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-
-    console.log("req.user:", req.user); // Debugging
+    // Attach the user to the request object for use in subsequent middleware
+    req.user = user;
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
-    res.status(401).json({ message: "Authentication failed", error });
+   
+    res.status(401).json({ message: "Authentication failed: " + error.message });
   }
 };
 
+// Middleware for role-based authorization
 const roleAuth = (allowedRoles) => {
   return (req, res, next) => {
     try {
       const userRole = req.user.role;
+      
+      // Check if the user's role is allowed
       if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({
-          message: "Access denied: insufficient permissions",
-        });
+        return res.status(403).json({ message: "Access denied " });
       }
+
       next();
     } catch (error) {
-      res.status(500).json({ message: "Role authentication failed", error });
+      
+      res.status(500).json({ message: "Role authentication failed: " + error.message });
     }
   };
-};
+}
 
 module.exports = {
   auth,
