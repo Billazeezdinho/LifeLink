@@ -37,6 +37,11 @@ const donorSchema = new mongoose.Schema(
     profilePics: {
       type: String
     },
+    role: {
+      type: String,
+      enum: ['donor', 'hospital'],
+      default: 'donor'
+    },
     status: {
       type: String,
       enum:['pending', 'accepted', 'declined'],

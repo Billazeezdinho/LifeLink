@@ -27,7 +27,7 @@ exports.register = async (req, res) => {
         //Create user
         const donor = new donorModel({
           fullName: fullName.trim(),
-          email: email.toLowerCase(),
+          email: req.body.email?.toLowerCase(),
           password: hashedPassword,
           bloodType,
           location, 

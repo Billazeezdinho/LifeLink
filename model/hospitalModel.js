@@ -1,34 +1,19 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const hospitalSchema = new mongoose.Schema({
-    name:{
-        type: String,
-        required: true
-    },
-    email:{
-        type: String,
-        required: true,
-        unique: true
-    }, 
-    location:{
-        type: String,
-        required: true
-    },
-    isVerified:{
-        type:Boolean,
-        default: false
-    },
-    bloodTypes:{
-        type:[String],
-        required: true
-    },
-    createdAt:{
-        type:Date,
-        default: Date.now
-    },
+const HospitalSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  location: { type: String, required: true },
+  role: { type: String, default: 'hospital' },
+  password: { type: String, required: true },
+  phone: { type: String },
+  address: { type: String },
+  city: { type: String },
+  state: { type: String },
+  profilePicture: { type: String },
+  kycCompleted: { type: Boolean, default: false } 
+}, { timestamps: true });
 
-},{timestamps: true}
-);
+// module.exports = mongoose.model('hospital', hospitalSchema);
 
-
-exports.HospitalModel = mongoose.model("Hospital", hospitalSchema)
+module.exports = mongoose.model('Hospital', HospitalSchema);
