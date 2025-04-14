@@ -39,6 +39,7 @@ const auth = async (req, res, next) => {
     } else if (hospital) {
       req.user = {
         id: hospital._id,
+        hospitalId: hospital._id,
         email: hospital.email,
         name: hospital.name || null,
         role: "hospital",

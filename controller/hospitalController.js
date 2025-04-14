@@ -1,5 +1,6 @@
 const donorModel  = require("../model/donorModel"); 
-const  hospitalModel  = require("../model/hospitalModel"); 
+const  hospitalModel  = require("../model/hospitalModel");
+const Hospital = require("../model/hospitalModel"); 
 const KYC = require('../model/kycModel');
 const bcrypt = require("bcrypt"); 
 const jwt = require("jsonwebtoken"); 

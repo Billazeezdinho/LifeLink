@@ -306,3 +306,16 @@ exports.resetPassword = async (req, res) => {
 };
 
   
+// Get all KYC submissions (for admin)
+exports.getAllKYCSubmissions = async (req, res) => {
+  try {
+    const kycs = await KYC.find()
+      .populate('hospital', 'name email address city state') // populate useful hospital info
+      .sort({ createdAt: -1 }); // show newest first
+
+    res.status(200).json({ message: 'KYC submissions retrieved successfully', kycs });
+  } catch (error) {
+    console.error('Error fetching KYC submissions:', error);
+    res.status(500).json({ message: 'Failed to retrieve KYC submissions', error: error.message });
+  }
+};

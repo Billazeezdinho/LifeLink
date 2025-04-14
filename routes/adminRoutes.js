@@ -10,6 +10,7 @@ const {
   declineKYC,
   forgotPassword,
   resetPassword,
+  getAllKYCSubmissions,
 } = require("../controller/adminController");
 
 // Import all middleware from the file
@@ -235,5 +236,74 @@ router.patch("/verify-kyc/:kycId", auth, roleAuth(["admin"]), approveKYC);
  *         description: Internal server error
  */
 router.patch("/decline-kyc/:kycId", auth, roleAuth(["admin"]), declineKYC);
+
+/**
+ * @swagger
+ * /api/admin/allKyc:
+ *   get:
+ *     summary: Get all KYC submissions
+ *     tags: [Admin KYC]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Admin can view all KYC submissions including hospital details and KYC documents.
+ *     responses:
+ *       200:
+ *         description: KYC submissions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: KYC submissions retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 661b31297f6d2ab89b6d9c0e
+ *                       hospital:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                       facilityImage:
+ *                         type: string
+ *                         format: uri
+ *                         example: https://res.cloudinary.com/yourcloud/image/upload/facility.jpg
+ *                       accreditedCertificate:
+ *                         type: string
+ *                         format: uri
+ *                       utilityBill:
+ *                         type: string
+ *                         format: uri
+ *                       licenseNumber:
+ *                         type: string
+ *                         example: L12345XYZ
+ *                       status:
+ *                         type: string
+ *                         enum: [pending, approved, declined]
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized - Token missing or invalid
+ *       403:
+ *         description: Forbidden - Admins only
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/allKyc', auth, roleAuth(["admin"]),getAllKYCSubmissions);
 
 module.exports = router;

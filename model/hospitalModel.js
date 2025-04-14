@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const hospitalSchema = new mongoose.Schema({
+const HospitalSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   location: { type: String, required: true },
@@ -14,4 +14,6 @@ const hospitalSchema = new mongoose.Schema({
   kycCompleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 
-module.exports = mongoose.model('hospital', hospitalSchema);
+// module.exports = mongoose.model('hospital', hospitalSchema);
+
+module.exports = mongoose.model('Hospital', HospitalSchema);
