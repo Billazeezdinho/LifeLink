@@ -77,9 +77,9 @@ router.post("/register", registerValidate, register);
  *       200:
  *         description: Logged in successfully
  *       400:
- *         description: Incorrect password
+ *         description: Invalid Credentials
  *       404:
- *         description: Donor not found
+ *         description: Invalid Credentials
  *       500:
  *         description: Internal server error
  */
@@ -99,7 +99,6 @@ router.post("/login", login);
  *         description: Internal server error
  */
 router.get("/donors", getAllDonor);
-
 /**
  * @swagger
  * /donors/{id}:
@@ -107,6 +106,8 @@ router.get("/donors", getAllDonor);
  *     summary: Get a donor by ID
  *     tags: [Donor]
  *     description: Retrieve a donor's details by their unique ID.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -119,6 +120,8 @@ router.get("/donors", getAllDonor);
  *         description: Donor details retrieved
  *       404:
  *         description: Donor not found
+ *       401:
+ *         description: Unauthorized - Token required or invalid
  *       500:
  *         description: Internal server error
  */
@@ -272,18 +275,18 @@ router.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
- * /resetPassword/{id}:
+ * /resetPassword/{token}:
  *   post:
  *     summary: Reset password
  *     tags: [Donor]
  *     description: Reset donor's password using a token and new password.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: token
  *         required: true
  *         schema:
  *           type: string
- *         description: Donor ID
+ *         description: Donor TOKEN
  *     requestBody:
  *       required: true
  *       content:
@@ -302,7 +305,7 @@ router.post("/forgotPassword", forgotPassword);
  *       500:
  *         description: Internal server error
  */
-router.post("/resetPassword/:id", resetNewPassword);
+router.post("/resetPassword/:token", resetNewPassword);
 
 /**
  * @swagger

@@ -2,7 +2,7 @@ const {transactionModel} = require('../model/transactionModel');
 const axios = require('axios')
 const otpGenerator = require('otp-generator');
 const otp = otpGenerator.generate(12, {specialChars: false})
-const ref =  `TCA-AF-${otp}`;
+const ref =  `LifeLink-ch6-${otp}`;
 const secret_key = process.env.korapay_secret_key
 const formattedDate = new Date().toLocaleString()
 

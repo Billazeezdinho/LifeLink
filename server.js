@@ -48,7 +48,22 @@ const swaggerOptions = {
             description: 'Development server'
         }
     ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "Enter your token like: `Bearer <your_token>`"
+      },
+    },
   },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+},
   apis: ["./routes/*.js"], // Load API documentation from route files
 };
 
@@ -68,5 +83,4 @@ app.use('/api/admin', adminRoutes);
 app.listen(PORT, ()=>{
     console.log(`Server is listening to PORT: ${PORT}`);
     console.log(`Swagger docs available at https://lifelink-7pau.onrender.com/api-docs`);
-})
-
+}); 

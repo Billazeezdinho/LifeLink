@@ -3,8 +3,9 @@
   const jwt = require('jsonwebtoken');
   const resetMail = require("../utils/resetMail");
   const sendMail = require("../utils/email");
-  const cloudinary = require('cloudinary');
+  const cloudinary = require('../config/cloudinary');
   const welcomeMail = require('../utils/welcome')
+  const fs = require("fs")
 
 const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
@@ -66,13 +67,13 @@ exports.login = async (req, res)=>{
       const donor = await donorModel.findOne({email: email.toLowerCase() });
       if(donor == null){
         return res.status(404).json({
-          message: 'Donor Not Found'
+          message: 'Invalid Credentials'
         })
       }
       const isPasswordCorrect = await bcrypt.compare(password, donor.password)
       if(isPasswordCorrect == false){
         return res.status(400).json({
-          message: 'Incorrect Password'
+          message: 'Invalid Credentials'
         })
       }
       const token = generatedToken(donor._id);
@@ -216,18 +217,21 @@ exports.updateProfile= async (req, res)=>{
       const updateFields = req.body;
       if(req.file){
         const result = await cloudinary.uploader.upload(req.file.path)
-        updateFields.profilepics = result.secure_url;
-      }
-      const updatedDonor = await donorModel.findByIdAndUpdate(req.user._id, updateFields, {new:true});
-      const token = generatedToken(updatedDonor);
-      
-    
-    
+        const updatedDonor = await donorModel.findByIdAndUpdate(req.user._id, {profilePics:result.secure_url}, {new:true});
+     
+    console.log(updatedDonor)
     // Send a success response
     res.status(201).json({
       message: 'profile picture uploaded successfully',
-      token
-  });
+      data: updatedDonor.profilePics});
+    
+    }else{
+      return res.status(400).json({
+        message: "Unable to Update Profile Pictuce"
+      })
+    }
+    
+  
 
   } catch (error) {
     // Unlink the file from our local storage
@@ -238,18 +242,20 @@ exports.updateProfile= async (req, res)=>{
       
     }
   }
+
+
 exports.forgotPassword = async (req, res)=>{
       try{
           const { email } = req.body;
-          const checkEmail = await donorModel.findOne({email})
+          const checkEmail = await donorModel.findOne({email:email.toLowerCase()})
           if(!checkEmail){
               return res.status(404).json({
                   message: 'Email not found'
               })
           }
-          const token = jwt.sign({id:checkEmail._id}, "secret_key", {expiresIn: '20min'})
-          const link = `${req.protocol}://${req.get('host')}/resetPassword/${token}`
-          const subject = "Reset Password" + " " + checkEmail.fullName;
+          const token = jwt.sign({id:checkEmail._id},process.env.key, {expiresIn: '20min'})
+          const link = `${req.protocol}://${req.get('host')}/api/v1/resetPassword/${token}`
+          const subject = "Reset Password" + " " + checkEmail.fullName.split(" ")[0];
           const text = `Reset Password ${checkEmail.fullName}, kindly use this link to reset your password ${link} `;
           sendMail({subject:subject, email:checkEmail.email, html:resetMail(link, checkEmail.fullName)})
           res.status(200).json({
@@ -265,13 +271,33 @@ exports.forgotPassword = async (req, res)=>{
   }
   exports.resetNewPassword = async (req, res) =>{
       try{
+        const { token } = req.params;
           const {newPassword} = req.body;
-          const checkdonor = await donorModel.findById(req.params.id)
+          if (!token){
+            return res.status(400).json({
+              message: "token is required"
+            })
+          }
+          const decoded = await jwt.verify(token, process.env.key);
+          if(!decoded){
+            return res.status(401).json({
+              message: "Invalid Token"
+            })
+          }
+          const userId = decoded.id;
+
+          const checkdonor = await donorModel.findById(userId)
           if(!checkdonor){
               return res.status(404).json({
                   message: 'Donor not found'
               })
           }
+          if(!newPassword){
+            return res.status(400).json({
+              message: "new Password is required"
+            })
+          }
+          
           const salt = await bcrypt.genSaltSync(10);
           const hash = await bcrypt.hashSync(newPassword, salt);
         
@@ -288,7 +314,7 @@ exports.forgotPassword = async (req, res)=>{
       }
   }
 
-  exports.changePassword = async (req, res) =>{
+exports.changePassword = async (req, res) =>{
       try{
           const { id, newPassword } = req.body;
           const checkdonor = await donorModel.findById( id )
