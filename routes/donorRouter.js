@@ -3,6 +3,7 @@ const { register, login, resetNewPassword, changePassword, forgotPassword, sched
 const { registerValidate } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
+
 /**
  * @swagger
  * tags:
@@ -17,26 +18,31 @@ const upload= require('../utils/multer');
  *     summary: Register a new donor
  *     tags: [Donor]
  *     description: Register a new donor with full name, email, password, blood type, location, and age.
- *     parameters:
- *       - in: body
- *         name: donor
- *         description: Donor registration details
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             fullName:
- *               type: string
- *             email:
- *               type: string
- *             password:
- *               type: string
- *             bloodType:
- *               type: string
- *             location:
- *               type: string
- *             age:
- *               type: number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Life Link
+ *               email:
+ *                 type: string
+ *                 example: LifeLink@mail.com
+ *               password:
+ *                 type: string
+ *                 example: StrongPassword123
+ *               bloodType:
+ *                 type: string
+ *                 example: O+
+ *               location:
+ *                 type: string
+ *                 example: New York
+ *               age:
+ *                 type: string
+ *                 example: "28"
  *     responses:
  *       201:
  *         description: Donor created successfully
@@ -54,18 +60,19 @@ router.post("/register", registerValidate, register);
  *     summary: Log in an existing donor
  *     tags: [Donor]
  *     description: Login a donor using email and password.
- *     parameters:
- *       - in: body
- *         name: donor
- *         description: Donor login details
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             email:
- *               type: string
- *             password:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: LifeLink@mail.com
+ *               password:
+ *                 type: string
+ *                 example: StrongPassword123
  *     responses:
  *       200:
  *         description: Logged in successfully
@@ -104,6 +111,8 @@ router.get("/donors", getAllDonor);
  *       - in: path
  *         name: id
  *         required: true
+ *         schema:
+ *           type: string
  *         description: Donor ID
  *     responses:
  *       200:
@@ -137,18 +146,19 @@ router.get("/dashboard", auth ,getDashboard);
  *     summary: Schedule a donation
  *     tags: [Donor]
  *     description: Schedule a donation appointment with a date and hospital ID.
- *     parameters:
- *       - in: body
- *         name: appointment
- *         description: Donation appointment details
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             date:
- *               type: string
- *             hospitalId:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 example: 2025-04-20
+ *               hospitalId:
+ *                 type: string
+ *                 example: 64321ab7e2f476001d98dccc
  *     responses:
  *       201:
  *         description: Donation scheduled successfully
@@ -170,7 +180,10 @@ router.post("/schedule", auth, scheduleDonation);
  *       - in: path
  *         name: status
  *         required: true
- *         description: Status of the donation (pending, completed, etc.)
+ *         schema:
+ *           type: string
+ *           enum: [pending, completed, cancelled]
+ *         description: Status of the donation
  *     responses:
  *       200:
  *         description: Donations found with the specified status
@@ -203,20 +216,25 @@ router.post("/logout", auth, logOut);
  *     summary: Update donor profile
  *     tags: [Donor]
  *     description: Update donor's profile information, including profile picture.
- *     parameters:
- *       - in: body
- *         name: donor
- *         description: Donor profile update details
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             fullName:
- *               type: string
- *             location:
- *               type: string
- *             age:
- *               type: number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Jane Doe
+ *               location:
+ *                 type: string
+ *                 example: Lagos
+ *               age:
+ *                 type: string
+ *                 example: "30"
+ *               profilePics:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Profile updated successfully
@@ -232,16 +250,16 @@ router.put("/profile", auth, upload.single("profilePics"), updateProfile);
  *     summary: Forgot password
  *     tags: [Donor]
  *     description: Send a password reset link to the donor's email.
- *     parameters:
- *       - in: body
- *         name: email
- *         description: Donor email address
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             email:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: LifeLink@Mail.com
  *     responses:
  *       200:
  *         description: Reset password link sent successfully
@@ -263,16 +281,19 @@ router.post("/forgotPassword", forgotPassword);
  *       - in: path
  *         name: id
  *         required: true
- *         description: Donor ID
- *       - in: body
- *         name: newPassword
- *         description: New password for the donor
- *         required: true
  *         schema:
- *           type: object
- *           properties:
- *             newPassword:
- *               type: string
+ *           type: string
+ *         description: Donor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 example: NewSecurePassword123
  *     responses:
  *       200:
  *         description: Password reset successfully
@@ -290,16 +311,16 @@ router.post("/resetPassword/:id", resetNewPassword);
  *     summary: Change password
  *     tags: [Donor]
  *     description: Change the donor's password.
- *     parameters:
- *       - in: body
- *         name: password
- *         description: Donor's new password
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             newPassword:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 example: AnotherSecurePass456
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -321,6 +342,8 @@ router.put("/changePassword", changePassword);
  *       - in: path
  *         name: id
  *         required: true
+ *         schema:
+ *           type: string
  *         description: Donor ID
  *     responses:
  *       200:
@@ -354,20 +377,22 @@ router.get("/hospitals", viewHospitals);
  *     summary: Book an appointment with a hospital
  *     tags: [Donor]
  *     description: Book an appointment with a selected hospital.
- *     parameters:
- *       - in: body
- *         name: appointment
- *         description: Appointment booking details
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             hospitalId:
- *               type: string
- *             date:
- *               type: string
- *             time:
- *               type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               hospitalId:
+ *                 type: string
+ *                 example: 64321ab7e2f476001d98dccc
+ *               date:
+ *                 type: string
+ *                 example: 2025-04-20
+ *               time:
+ *                 type: string
+ *                 example: 10:00 AM
  *     responses:
  *       200:
  *         description: Appointment booked successfully
@@ -375,5 +400,4 @@ router.get("/hospitals", viewHospitals);
  *         description: Internal server error
  */
 router.post("/bookAppointment", bookAppointment);
-
 module.exports = router;

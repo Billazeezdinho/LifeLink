@@ -106,7 +106,7 @@ exports.getAllDonor = async (req, res) =>{
       }
     
     }
-  exports.getOneDonorById = async (req, res)=>{
+exports.getOneDonorById = async (req, res)=>{
     try {
       const donor = await donorModel.findById(req.params.id);
       if(!donor){
@@ -219,7 +219,7 @@ exports.updateProfile= async (req, res)=>{
         updateFields.profilepics = result.secure_url;
       }
       const updatedDonor = await donorModel.findByIdAndUpdate(req.user._id, updateFields, {new:true});
-      const token = generatedToken(updatedDonor._id);
+      const token = generatedToken(updatedDonor);
       
     
     

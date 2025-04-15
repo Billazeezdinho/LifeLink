@@ -17,9 +17,9 @@ const auth = async (req, res, next) => {
     
     // Check if token is blacklisted
     if (blacklistedTokens.has(token)) {
-      return res.status(401).json({ message: "Token has invalid. Please log in again." });
+      return res.status(401).json({ message: ` ${req.user} logged out. Please log in again.` });
     }
-    
+  
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.key); // Use a more descriptive variable name for the secret
     let user;
