@@ -49,13 +49,13 @@ const swaggerOptions = {
         }
     ],
   },
-  apis: ["./router/*.js"], // Load API documentation from route files
+  apis: ["./routes/*.js"], // Load API documentation from route files
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Use Routers
+// Use Routers    
 app.get('/', (req, res)=>{
     res.send('Welcome to LifeLink')
 })
