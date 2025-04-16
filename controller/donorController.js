@@ -5,6 +5,7 @@
   const sendMail = require("../utils/email");
   const cloudinary = require('../config/cloudinary');
   const welcomeMail = require('../utils/welcome')
+  const{ stringifyPhoneNumber}  = require('../utils/phoneNumber')
   const fs = require("fs")
 
 const generatedToken = (id) => {
@@ -241,8 +242,33 @@ exports.updateProfile= async (req, res)=>{
       })
       
     }
+}
+exports.UpdateDonorDetails = async (req, res) =>{
+  try {
+    const updateFields = req.body;
+    if(updateFields.phoneNumber){
+      const phoneNumber = await stringifyPhoneNumber(updateFields.phoneNumber);
+      if(!phoneNumber || !phoneNumber.isValid()){
+        return res.status(400).json({
+          message: "Invalid phone Number Format"
+        });
+      }
+      updateFields.phoneNumber = phoneNumber.nationalNumber;
+      updateFields.countryCode = phoneNumber.countryCallingCode;
+    }
+    const updatedDonor = await donorModel.findByIdAndUpdate( req.user._id, updateFields, {new: true});
+    const token = generatedToken(updatedDonor._id);
+    res.status(200).json({
+      message: 'Profile Details Updated successfully',
+      data: updatedDonor
+    })
+  } catch (error) {
+    res.status(500).json({
+      message:"Failed to update donor details" + error.message
+    })
+    
   }
-
+}
 
 exports.forgotPassword = async (req, res)=>{
       try{

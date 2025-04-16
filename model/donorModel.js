@@ -34,6 +34,9 @@ const donorSchema = new mongoose.Schema(
     gender: {
       type: String,
     },
+    phoneNumber: {
+      type: String,
+    },
     profilePics: {
       type: String
     },

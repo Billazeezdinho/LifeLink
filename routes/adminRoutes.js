@@ -19,7 +19,7 @@ const { auth, roleAuth } = require("../middleware/authMiddleware");
 //  Public routes
 /**
  * @swagger
- * /api/admin/register:
+ * /admin/register:
  *   post:
  *     summary: Register a new admin
  *     tags: [Admin]
@@ -55,7 +55,7 @@ router.post("/register", adminRegister);
 
 /**
  * @swagger
- * /api/admin/login:
+ * /admin/login:
  *   post:
  *     summary: Admin login
  *     tags: [Admin]
@@ -86,7 +86,7 @@ router.post("/login", adminLogin);
 
 /**
  * @swagger
- * /api/admin/forgotPassword:
+ * /admin/forgotPassword:
  *   post:
  *     summary: Send password reset email to admin
  *     tags: [Admin]
@@ -112,7 +112,7 @@ router.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
- * /api/admin/resetPassword:
+ * /admin/resetPassword:
  *   post:
  *     summary: Reset admin password
  *     tags: [Admin]
@@ -143,7 +143,7 @@ router.post("/forgotPassword", forgotPassword);
 router.post("/resetPassword", auth, roleAuth(["admin"]), resetPassword);
 /**
  * @swagger
- * /api/admin/users:
+ * /admin/users:
  *   get:
  *     summary: Get all users (donors and hospitals)
  *     tags: [Admin]
@@ -159,7 +159,7 @@ router.get("/users", auth, roleAuth(["admin"]), viewUsers);
 
 /**
  * @swagger
- * /api/admin/delete/{userId}:
+ * /admin/delete/{userId}:
  *   delete:
  *     summary: Delete a user (either donor or hospital)
  *     tags: [Admin]
@@ -185,7 +185,7 @@ router.delete("/delete/:userId", auth, roleAuth(["admin"]), deleteUser);
 
 /**
  * @swagger
- * /api/admin/verify-kyc/{kycId}:
+ * /admin/verify-kyc/{kycId}:
  *   patch:
  *     summary: Approve KYC for a hospital
  *     tags: [Admin]
@@ -212,7 +212,7 @@ router.patch("/verify-kyc/:kycId", auth, roleAuth(["admin"]), approveKYC);
 
 /**
  * @swagger
- * /api/admin/decline-kyc/{kycId}:
+ * /admin/decline-kyc/{kycId}:
  *   patch:
  *     summary: Decline KYC for a hospital
  *     tags: [Admin]
@@ -239,7 +239,7 @@ router.patch("/decline-kyc/:kycId", auth, roleAuth(["admin"]), declineKYC);
 
 /**
  * @swagger
- * /api/admin/allKyc:
+ * /admin/allKyc:
  *   get:
  *     summary: Get all KYC submissions
  *     tags: [Admin KYC]

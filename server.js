@@ -76,7 +76,7 @@ app.get('/', (req, res)=>{
 })
 app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
-app.use('/api/hospital', hospitalRoutes);
+app.use('/', hospitalRoutes);
 app.use('/api/admin', adminRoutes);
 
 

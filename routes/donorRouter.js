@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
@@ -216,7 +216,7 @@ router.post("/logout", auth, logOut);
  * @swagger
  * /profile:
  *   put:
- *     summary: Update donor profile
+ *     summary: Update donor profile picture
  *     tags: [Donor]
  *     description: Update donor's profile information, including profile picture.
  *     requestBody:
@@ -245,6 +245,90 @@ router.post("/logout", auth, logOut);
  *         description: Internal server error
  */
 router.put("/profile", auth, upload.single("profilePics"), updateProfile);
+
+/**
+ * @swagger
+ * /update-profile:
+ *   put:
+ *     summary: Update donor profile information
+ *     tags: [Donor]
+ *     description: This route allows a donor to update any of their profile details including name, location, phone number, and other fields.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: "life Link"
+ *               location:
+ *                 type: string
+ *                 example: "Festac, Lagos"
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "+2349090909090"
+ *               email:
+ *                 type: string
+ *                 example: "donor@example.com"
+ *               age:
+ *                 type: string
+ *                 example: "30"
+ *               gender:
+ *                 type: string
+ *                 example: "female"
+ *               bloodType:
+ *                 type: string
+ *                 example: "O+"
+ *     responses:
+ *       200:
+ *         description: Profile details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Profile Details Updated successfully"
+ *                 data:
+ *                   type: object
+ *                   example:
+ *                     fullName: "Nlife Link"
+ *                     email: "donor@example.com"
+ *                     location: "Festac, Lagos"
+ *                     phoneNumber: "+2349090909090"
+ *                     bloodType: "O+"
+ *                     age: "30"
+ *                     gender: "female"
+ *       400:
+ *         description: Invalid input or phone number format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid phone Number Format"
+ *       500:
+ *         description: Server error while updating profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to update donor details: Internal Server Error"
+ */
+
+// Donor Update Route
+router.put('/update-profile', auth, UpdateDonorDetails);
+
 
 /**
  * @swagger
