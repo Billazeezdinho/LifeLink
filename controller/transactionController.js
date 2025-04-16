@@ -23,6 +23,7 @@ exports.initializePayment = async (req, res) =>{
             currency: 'NGN',
             reference: ref
         };
+        console.log(secret_key)
         const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
             headers: {
                 Authorization: `Bearer ${secret_key}`
@@ -60,7 +61,7 @@ exports.verifyPayment = async (req, res) => {
     try {
         const { reference } = req.query;
         const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`,{
-            headers: { Authorization: ` Bearer ${secret_key}`}
+            headers: { Authorization: `Bearer ${secret_key}`}
         });
         const { data } = response?.data;
 
