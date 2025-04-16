@@ -19,11 +19,9 @@ const cloudinary = require('../config/cloudinary');
 exports.register =async (req, res) => {
 
   try {
-    const { fullName, email, location, role, password } = req.body;
-
-    console.log('Request body:', req.body);
+    const { fullName, email, location, role, password, phone, city } = req.body;    
     // Validate input
-    if (!fullName || !email || !location || !role || !password) {
+    if (!fullName || !email || !location || !role || !password || !phone || !city) {
       return res.status(400).json({
         message: "All fields (fullName, email, location, role, password) are required",
       });
@@ -47,6 +45,8 @@ exports.register =async (req, res) => {
       location: location.trim(),
       role: role.trim().toLowerCase(),
       password: hashedPassword,
+      phone: phone.trim().toLowerCase(),
+      city: city.trim().toLowerCase(),
     });
 
     await hospital.save();

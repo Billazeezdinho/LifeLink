@@ -42,6 +42,10 @@ const upload = require('../config/multerConfig');
  *                 type: string
  *               password:
  *                 type: string
+ *               city:
+ *                 type: string
+ *               phone:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Hospital created successfully
@@ -85,7 +89,7 @@ router.post('/login', login);
 
 /**
  * @swagger
- * /api/hospital/forgotPassword:
+ * /hospital/forgotPassword:
  *   post:
  *     summary: Send password reset link to hospital email
  *     tags: [Hospital]
