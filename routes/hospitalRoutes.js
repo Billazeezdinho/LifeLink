@@ -21,7 +21,7 @@ const upload = require('../config/multerConfig');
 
 /**
  * @swagger
- * /api/hospital/register:
+ * /hospital/register:
  *   post:
  *     summary: Register a new hospital
  *     tags: [Hospital]
@@ -50,11 +50,11 @@ const upload = require('../config/multerConfig');
  *       500:
  *         description: Internal server error
  */
-router.post('/register', register);
+router.post('/hospital/register', register);
 
 /**
  * @swagger
- * /api/hospital/login:
+ * /hospital/login:
  *   post:
  *     summary: Login a hospital
  *     tags: [Hospital]
@@ -108,11 +108,11 @@ router.post('/login', login);
  *       500:
  *         description: Internal server error
  */
-router.post('/forgotPassword', forgotPassword);
+router.post('/hospital/forgotPassword', forgotPassword);
 
 /**
  * @swagger
- * /api/hospital/resetPassword:
+ * /hospital/resetPassword:
  *   post:
  *     summary: Reset hospital password using token
  *     tags: [Hospital]
@@ -137,12 +137,12 @@ router.post('/forgotPassword', forgotPassword);
  *       500:
  *         description: Internal server error
  */
-router.post('/resetPassword', auth, roleAuth(['hospital']), resetPassword);
+router.post('/hospital/resetPassword', auth, roleAuth(['hospital']), resetPassword);
 
 
 /**
  * @swagger
- * /api/hospital/updateProfile:
+ * /hospital/updateProfile:
  *   patch:
  *     summary: Update hospital profile
  *     tags: [Hospital]
@@ -177,12 +177,12 @@ router.post('/resetPassword', auth, roleAuth(['hospital']), resetPassword);
  *         description: Internal server error
  */
 
-router.patch('/updateProfile', auth, roleAuth(['hospital']), updateProfile);
+router.patch('/hospital/updateProfile', auth, roleAuth(['hospital']), updateProfile);
 
 
 /**
  * @swagger
- * /api/hospital/request-blood:
+ * /hospital/request-blood:
  *   post:
  *     summary: Submit a blood request
  *     tags: [Hospital]
@@ -215,11 +215,11 @@ router.patch('/updateProfile', auth, roleAuth(['hospital']), updateProfile);
  *         description: Internal server error
  */
 
-router.post('/request-blood', auth, roleAuth(['hospital']), submitBloodRequest);
+router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBloodRequest);
 
 /**
  * @swagger
- * /api/hospital/history:
+ * /hospital/history:
  *   get:
  *     summary: Get blood request history for a hospital
  *     tags: [Hospital]
@@ -240,12 +240,12 @@ router.post('/request-blood', auth, roleAuth(['hospital']), submitBloodRequest);
  *         description: Internal server error
  */
 
-router.get('/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
+router.get('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
 
 
 /**
  * @swagger
- * /api/hospital/profile:
+ * /hospital/profile:
  *   get:
  *     summary: Get hospital profile
  *     tags: [Hospital]
@@ -264,12 +264,12 @@ router.get('/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
  *         description: Internal server error
  */
 
-router.get('/profile', auth, roleAuth(['hospital']), getHospitalProfile);
+router.get('/hospital/profile', auth, roleAuth(['hospital']), getHospitalProfile);
 
 
 /**
  * @swagger
- * /api/hospital/search-donors:
+ * /hospital/search-donors:
  *   get:
  *     summary: Search for available blood donors
  *     tags: [Hospital]
@@ -291,7 +291,7 @@ router.get('/profile', auth, roleAuth(['hospital']), getHospitalProfile);
  *       500:
  *         description: Internal server error
  */
-router.get('/search-donors', auth, roleAuth(['hospital']), kycMiddleware, searchForDonors);
+router.get('/hospital/search-donors', auth, roleAuth(['hospital']), kycMiddleware, searchForDonors);
 
 
 const kycUpload = upload.fields([
@@ -303,7 +303,7 @@ const kycUpload = upload.fields([
 
 /**
  * @swagger
- * /api/hospital/kyc:
+ * /hospital/kyc:
  *   post:
  *     summary: Submit KYC
  *     tags: [Hospital]
@@ -338,6 +338,6 @@ const kycUpload = upload.fields([
  *         description: Internal server error
  */
 
-router.post('/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC);
+router.post('/hospital/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC);
 
 module.exports = router;

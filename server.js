@@ -76,8 +76,8 @@ app.get('/', (req, res)=>{
 })
 app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
-app.use('/', hospitalRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/v1', hospitalRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 
 app.listen(PORT, ()=>{
