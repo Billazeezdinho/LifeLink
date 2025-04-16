@@ -78,7 +78,7 @@ exports.adminRegister = async (req, res) => {
         message: 'Incorrect Password'
       })
     }
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: admin._id }, process.env.key, {
       expiresIn: '1d'
     });
     
@@ -255,7 +255,7 @@ exports.forgotPassword = async (req, res) => {
     }
 
     // Generate the password reset token
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: admin._id }, process.env.key, { expiresIn: '1h' });
 
     // Send the reset email
     await sendEmail(email, 'Password Reset', `Click the link to reset your password: ${process.env.FRONTEND_URL}/reset-password/${token}`);
@@ -281,7 +281,7 @@ exports.resetPassword = async (req, res) => {
 
   try {
     // Decode the token to get hospital ID
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.key);
     const adminId = decoded.id;
 
     // Find the hospital by ID

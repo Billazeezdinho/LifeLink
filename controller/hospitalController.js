@@ -73,12 +73,12 @@ exports.login = async (req, res) => {
 
     const hospital = await hospitalModel.findOne({ email: email.toLowerCase() });
     if (!hospital) {
-      return res.status(404).json({ message: 'Hospital Not Found' });
+      return res.status(404).json({ message: 'invalid credentials' });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, hospital.password);
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: 'Incorrect Password' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     //  Ensure role is saved correctly
@@ -94,7 +94,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { id: hospital._id, role: hospital.role }, // Now guaranteed to be lowercase
-      process.env.JWT_SECRET,
+      process.env.key,
       { expiresIn: '1d' }
     );
 
@@ -292,7 +292,7 @@ exports.forgotPassword = async (req, res) => {
     }
 
     // Generate the password reset token
-    const token = jwt.sign({ id: hospital._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: hospital._id }, process.env.key, { expiresIn: '1h' });
 
     // Send the reset email
     await sendEmail(email, 'Password Reset', `Click the link to reset your password: ${process.env.FRONTEND_URL}/reset-password/${token}`);
@@ -318,7 +318,7 @@ exports.resetPassword = async (req, res) => {
 
   try {
     // Decode the token to get hospital ID
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.key);
     const hospitalId = decoded.id;
 
     // Find the hospital by ID
