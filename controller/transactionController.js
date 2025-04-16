@@ -5,7 +5,6 @@ const otp = otpGenerator.generate(12, {specialChars: false})
 const ref =  `LifeLink-ch6-${otp}`;
 const secret_key = process.env.korapay_secret_key
 const formattedDate = new Date().toLocaleString()
-require('dotenv').config();
 
 exports.initializePayment = async (req, res) =>{
     try {
@@ -24,7 +23,7 @@ exports.initializePayment = async (req, res) =>{
             currency: 'NGN',
             reference: ref
         };
-        console.log(secret_key)
+        
         const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
             headers: {
                 Authorization: `Bearer ${secret_key}`
@@ -54,7 +53,7 @@ exports.initializePayment = async (req, res) =>{
         res.status(500).json({
             message: ' Internal server error ' + error.message
         })
-        
+         
     }
 }
 

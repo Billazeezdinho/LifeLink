@@ -84,7 +84,7 @@ router.post('/hospital/register', register);
  *         description: Internal server error
  */
 
-router.post('/login', login);
+router.post('/hospital/login', login);
 
 
 /**
