@@ -6,7 +6,8 @@
   const cloudinary = require('../config/cloudinary');
   const welcomeMail = require('../utils/welcome')
   const{ stringifyPhoneNumber}  = require('../utils/phoneNumber')
-  const fs = require("fs")
+  const fs = require("fs");
+const hospitalModel = require('../model/hospitalModel');
 
 const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
@@ -376,8 +377,16 @@ exports.changePassword = async (req, res) =>{
   exports.viewHospitals = async (req, res) => {
     try {
       // Fetch hospitals list
-      const hospitals = await Hospital.find();
-      res.status(200).json(hospitals);
+      const hospitals = await hospitalModel.find();
+      if(!hospitals){
+        return res.status.json({
+          message: 'Hospitals Not Found'
+        })
+      }
+      res.status(200).json({
+        message: 'Available Hospitals',
+        data: hospitals
+      });
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
     }
