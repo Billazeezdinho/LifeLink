@@ -280,7 +280,7 @@ exports.forgotPassword = async (req, res)=>{
               })
           }
           const token = jwt.sign({id:checkEmail._id},process.env.key, {expiresIn: '20min'})
-          const link = `${req.protocol}://${req.get('host')}/api/v1/resetPassword/${token}`
+          const link = `https://lifelink-xi.vercel.app/resetpassword`
           const subject = "Reset Password" + " " + checkEmail.fullName.split(" ")[0];
           const text = `Reset Password ${checkEmail.fullName}, kindly use this link to reset your password ${link} `;
           sendMail({subject:subject, email:checkEmail.email, html:resetMail(link, checkEmail.fullName)})
