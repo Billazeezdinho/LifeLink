@@ -226,15 +226,6 @@ router.post("/logout", auth, logOut);
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
- *                 type: string
- *                 example: Jane Doe
- *               location:
- *                 type: string
- *                 example: Lagos
- *               age:
- *                 type: string
- *                 example: "30"
  *               profilePics:
  *                 type: string
  *                 format: binary

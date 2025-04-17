@@ -339,28 +339,31 @@ exports.resetNewPassword = async (req, res) =>{
           })
       }
   }
-
+ 
 exports.changePassword = async (req, res) =>{
       try{
-          const { id, newPassword } = req.body;
-          const checkdonor = await donorModel.findById( id )
+          const { currentPassword, newPassword } = req.body;
+          if(!currentPassword || !newPassword) {
+            return res.status(404).json({
+            message:  'Please provide both current and new password.'
+            })
+          }
+          const checkdonor = await donorModel.findById(req.user.id )
           if(!checkdonor){
               return res.status(404).json({
                   message: 'Donor not found'
               })
           }
-          
+          const isMatch = await bcrypt.compare(currentPassword, checkdonor.password);
+          if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect.' });
+          }
+  
 
           const salt = await bcrypt.genSaltSync(10);
           const hashedPassword = await bcrypt.hashSync(newPassword, salt);
-          const findDonor = await donorModel.findByIdAndUpdate(id, {password: hashedPassword})
-          
-          if(!findDonor){
-              return res.status(400).json({
-                  message: 'Failed to change password'
-              })
-
-          }
+          checkdonor.password = hashedPassword;
+          await checkdonor.save();
           res.status(200).json({
               message: 'Password changed successfully'
           })
