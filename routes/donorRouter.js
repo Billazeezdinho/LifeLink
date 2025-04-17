@@ -382,12 +382,15 @@ router.post("/forgotPassword", forgotPassword);
  */
 router.post("/resetPassword/:token", resetNewPassword);
 
+
 /**
  * @swagger
  * /changePassword:
  *   put:
  *     summary: Change password
  *     tags: [Donor]
+ *     security:
+ *       - bearerAuth: []   # <-- add this to require JWT token
  *     description: Change the donor's password.
  *     requestBody:
  *       required: true
@@ -395,19 +398,27 @@ router.post("/resetPassword/:token", resetNewPassword);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
  *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 example: OldSecurePass456
  *               newPassword:
  *                 type: string
  *                 example: AnotherSecurePass456
  *     responses:
  *       200:
  *         description: Password changed successfully
+ *       400:
+ *         description: Current password incorrect or invalid input
  *       404:
  *         description: Donor not found
  *       500:
  *         description: Internal server error
  */
-router.put("/changePassword", changePassword);
+router.put("/changePassword", auth, changePassword);
 
 /**
  * @swagger
