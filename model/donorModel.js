@@ -12,7 +12,7 @@ const donorSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-      lowerCase: true,
+      lowercase: true,
       unique: true
     },
     password: {
