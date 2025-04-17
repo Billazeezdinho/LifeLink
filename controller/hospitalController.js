@@ -137,7 +137,7 @@ exports.login = async (req, res) => {
   
   exports.submitBloodRequest = async (req, res) => { 
     try {
-      const { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
+      let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
   
       if (req.user.role !== 'hospital') {
         return res.status(403).json({ message: 'Only hospitals can make a blood request' });
