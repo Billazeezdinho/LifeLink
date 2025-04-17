@@ -14,6 +14,7 @@ const path = require('path');
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
+const moment = require('moment')
 
 
 exports.register =async (req, res) => {
@@ -139,19 +140,41 @@ exports.login = async (req, res) => {
       if (req.user.role !== 'hospital') {
         return res.status(403).json({ message: 'Only hospitals can make a blood request' });
       }
-      console.log('Amount from body:', amount);
+      if (typeof amount === 'string') {
+        amount = parseFloat(amount.replace(/,/g, ''));
+      }
+  
+      // Validate numberOfPints is provided and is a number
+      if (!numberOfPints) {
+        return res.status(400).json({ message: "numberOfPints is required." });
+      }
+
+      const formattedPreferredDate = moment(preferredDate, 'YYYY-MM-DD');
       const request = new BloodRequest({
         hospital: req.user.id,  // Referring to the hospital
         bloodGroup,
         numberOfPints,
-        preferredDate,
+        preferredDate: formattedPreferredDate ,
         urgencyLevel,
         amount,  // Correct field to match schema
       });
   
       await request.save();
+
+      const responseData = {
+        _id: request._id,
+        hospital: request.hospital,
+        bloodGroup: request.bloodGroup,
+        numberOfPints: request.numberOfPints,
+        preferredDate: moment(request.preferredDate).format('YYYY-MM-DD'), 
+        urgencyLevel: request.urgencyLevel,
+        amount: request.amount,
+        status: request.status,
+        createdAt: moment(request.createdAt).format('YYYY-MM-DD HH:mm'),
+        updatedAt: moment(request.updatedAt).format('YYYY-MM-DD HH:mm'),
+      };
   
-      res.status(201).json({ message: 'Blood request submitted successfully', request });
+      res.status(201).json({ message: 'Blood request submitted successfully', data: responseData });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error', error: error.message });
