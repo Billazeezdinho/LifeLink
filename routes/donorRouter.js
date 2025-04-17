@@ -218,7 +218,7 @@ router.post("/logout", auth, logOut);
  *   put:
  *     summary: Update donor profile picture
  *     tags: [Donor]
- *     description: Update donor's profile information, including profile picture.
+ *     description: Update donor's profile picture.
  *     requestBody:
  *       required: true
  *       content:
