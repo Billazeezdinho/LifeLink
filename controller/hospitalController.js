@@ -1,11 +1,13 @@
 const {donorModel}  = require("../model/donorModel"); 
 const  hospitalModel  = require("../model/hospitalModel");
 const Hospital = require("../model/hospitalModel"); 
+const appointmentModel = require("../model/appointmentModel"); 
 const KYC = require('../model/kycModel');
 const bcrypt = require("bcrypt"); 
 const jwt = require("jsonwebtoken"); 
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
+const sendMail = require("../utils/email");
 const email  = require("../utils/email");
 require("dotenv").config(); 
 const BloodRequest = require('../model/bloodRequestModel');
@@ -411,5 +413,75 @@ exports.submitKYC = async (req, res) => {
   } catch (error) {
     console.error('KYC Error:', error);
     res.status(500).json({ message: 'KYC submission failed', error: error.message });
+  }
+};
+
+exports.getHospitalAppointments = async (req, res) => {
+  try {
+    if (req.user.role !== "hospital") {
+      return res.status(403).json({ message: "Only hospitals can view their appointments." });
+    }
+
+    const appointments = await appointmentModel
+      .find({ hospital: req.user.id })
+      .populate("donor", "fullName email bloodType phoneNumber")
+      .sort({ createdAt: -1 }); // Latest first
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error while fetching appointments. " + error.message });
+  }
+};
+
+// Accept or Reject an appointment
+exports.respondToAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body; // expected 'accepted' or 'declined'
+
+    if (!["accepted", "declined"].includes(status)) {
+      return res.status(400).json({ message: "Status must be either 'accepted' or 'declined'." });
+    }
+
+    const appointment = await appointmentModel.findById(appointmentId).populate("donor", "fullName email");
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found." });
+    }
+
+    if (appointment.hospital.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only manage your own hospital appointments." });
+    }
+
+    appointment.status = status;
+    await appointment.save();
+
+    await sendMail(
+      appointment.donor.email,
+      `Appointment ${status === "accepted" ? "Accepted" : "Declined"}`,
+      `Hello ${appointment.donor.fullName},
+
+Your appointment request has been ${status} by the hospital.
+
+Please log in to your LifeLink dashboard to view more details.
+
+Thank you,
+LifeLink Team`
+    );
+
+    await donorModel.findByIdAndUpdate(appointment.donor._id, {
+      $push: {
+        notifications: {
+          message: `Your appointment was ${status} by the hospital.`,
+          from: "Hospital",
+        },
+      },
+    });
+
+    res.status(200).json({ message: `Appointment ${status} successfully.` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error while responding to appointment." + error.message });
   }
 };

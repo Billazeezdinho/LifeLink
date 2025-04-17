@@ -12,6 +12,8 @@ const {
   getBloodRequestHistory,
   resetPassword,
   updateProfile,
+  getHospitalAppointments,
+  respondToAppointment,
 } = require('../controller/hospitalController');
 
 // Import named exports from middleware
@@ -295,6 +297,103 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
  *                   example: Internal Server Error
  */
 router.get('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
+
+/**
+ * @swagger
+ * /appointments:
+ *   get:
+ *     summary: Get all appointments for the hospital
+ *     tags: [Hospital]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Fetches a list of all donors who have booked appointments with the hospital.
+ *     responses:
+ *       200:
+ *         description: List of appointments fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Appointments fetched successfully
+ *                 appointments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       donorName:
+ *                         type: string
+ *                         example: John Doe
+ *                       donorEmail:
+ *                         type: string
+ *                         example: johndoe@example.com
+ *                       bloodType:
+ *                         type: string
+ *                         example: O+
+ *                       date:
+ *                         type: string
+ *                         example: 2025-04-22
+ *                       time:
+ *                         type: string
+ *                         example: 10:00 AM
+ *                       status:
+ *                         type: string
+ *                         example: pending
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/appointments", auth, getHospitalAppointments); 
+
+/**
+ * @swagger
+ * /appointments/{appointmentId}/respond:
+ *   put:
+ *     summary: Respond to a donor appointment
+ *     tags: [Hospital]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Hospital can accept or reject a donor's appointment request.
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the appointment to respond to
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [accepted, declined]
+ *                 example: accepted
+ *     responses:
+ *       200:
+ *         description: Appointment response recorded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Appointment accepted
+ *       400:
+ *         description: Invalid status value
+ *       404:
+ *         description: Appointment not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/appointments/:appointmentId/respond", auth, respondToAppointment); 
 
 /**
  * @swagger
