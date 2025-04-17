@@ -189,7 +189,8 @@ router.patch('/hospital/updateProfile', auth, roleAuth(['hospital']), updateProf
  * /hospital/request-blood:
  *   post:
  *     summary: Submit a blood request
- *     tags: [Hospital]
+ *     tags: 
+ *       - Hospital
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -198,40 +199,77 @@ router.patch('/hospital/updateProfile', auth, roleAuth(['hospital']), updateProf
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - bloodGroup
+ *               - numberOfPints
+ *               - preferredDate
+ *               - amount
  *             properties:
  *               bloodGroup:
  *                 type: string
+ *                 example: O+
  *               numberOfPints:
  *                 type: integer
+ *                 example: 5
  *               preferredDate:
  *                 type: string
  *                 format: date
+ *                 example: 2025-05-15
  *               urgencyLevel:
  *                 type: string
+ *                 enum: [low, medium, high]
+ *                 example: "high"
  *               amount:
  *                 type: number
+ *                 example: 20000
  *     responses:
  *       201:
  *         description: Blood request submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blood request submitted successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/BloodRequest'
  *       403:
  *         description: Forbidden – Only hospitals can make a blood request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Only hospitals can submit blood requests.
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
  */
-
 router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBloodRequest);
 
 /**
  * @swagger
  * /hospital/history:
  *   get:
- *     summary: Get blood request history for a hospital
- *     tags: [Hospital]
+ *     summary: Retrieve the blood request history of the authenticated hospital
+ *     tags: 
+ *       - Hospital
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of past blood requests for the hospital
+ *         description: Successful response - returns a list of blood requests made by the hospital
  *         content:
  *           application/json:
  *             schema:
@@ -239,11 +277,26 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
  *               items:
  *                 $ref: '#/components/schemas/BloodRequest'
  *       403:
- *         description: Forbidden – Only hospitals can view their blood request history
+ *         description: Forbidden - Only hospitals are allowed to access their blood request history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Only hospitals can view blood request history.
  *       500:
- *         description: Internal server error
+ *         description: Internal Server Error - Something went wrong on the server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
  */
-
 router.get('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
 
 
