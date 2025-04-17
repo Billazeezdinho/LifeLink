@@ -57,6 +57,11 @@ const swaggerOptions = {
         description: "Enter your token like: `Bearer <your_token>`"
       },
     },
+    schemas: {
+      BloodRequest: {
+        type: "object",
+      }
+    }
   },
   security: [
     {
