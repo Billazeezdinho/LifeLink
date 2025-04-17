@@ -465,19 +465,26 @@ router.get("/hospitals", viewHospitals);
  *   post:
  *     summary: Book an appointment with a hospital
  *     tags: [Donor]
- *     description: Book an appointment with a selected hospital.
+ *     security:
+ *       - bearerAuth: []   # ✅ This matches your auth middleware
+ *     description: Allows a donor to book an appointment with a selected hospital.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - hospitalId
+ *               - date
+ *               - time
  *             properties:
  *               hospitalId:
  *                 type: string
  *                 example: 64321ab7e2f476001d98dccc
  *               date:
  *                 type: string
+ *                 format: date
  *                 example: 2025-04-20
  *               time:
  *                 type: string
@@ -485,8 +492,13 @@ router.get("/hospitals", viewHospitals);
  *     responses:
  *       200:
  *         description: Appointment booked successfully
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: Hospital not found
  *       500:
  *         description: Internal server error
  */
-router.post("/bookAppointment", bookAppointment);
+router.post("/bookAppointment", auth, bookAppointment);
+
 module.exports = router;

@@ -8,6 +8,7 @@
   const{ stringifyPhoneNumber}  = require('../utils/phoneNumber')
   const fs = require("fs");
 const hospitalModel = require('../model/hospitalModel');
+const appointmentModel = require('../model/appointmentModel');
 
 const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
@@ -391,32 +392,70 @@ exports.changePassword = async (req, res) =>{
       res.status(500).json({ message: 'Server error' });
     }
   };
-
-  exports.bookAppointment = async (req, res) => {
-    const { hospitalId, date, time } = req.body;
-    
+exports.bookAppointment = async (req, res) => {
     try {
-      const appointment = new Appointment({
+      const { hospitalId, date, time } = req.body;
+      if (!hospitalId || !date || !time) {
+        return res.status(400).json({ 
+          message: "hospitalId, date, and time are required." 
+        });
+      }
+      const hospital = await hospitalModel.findById(hospitalId);
+      if (!hospital) {
+        return res.status(404).json({
+       message: "Hospital not found." 
+      });
+      }
+      const appointment = new appointmentModel({
         donor: req.user.id,
         hospital: hospitalId,
         date,
         time,
       });
+  
       await appointment.save();
-      
-      // Send email notification to the hospital
-      sendEmail(
-        'hospital-email@example.com',
-        'Appointment Request',
-        `A donor wants to book an appointment with you. Please log into the Lifelink app to read, add, confirm, or reschedule.`
+      const populatedAppointment = await appointmentModel.findById(appointment._id).populate('donor', 'fullName email bloodType').populate('hospital', 'fullName email');
+  
+      // Format date 
+      const formattedDate = moment(populatedAppointment.date).format('YYYY-MM-DD');
+  
+      // Send email notification
+      await sendMail(
+        hospital.email,
+        'New Appointment Request',
+        `Hello ${hospital.fullName},
+  
+  A donor (${populatedAppointment.donor.fullName}) wants to book an appointment at your hospital.
+  
+  - Donor Name: ${populatedAppointment.donor.fullName}
+  - Donor Email: ${populatedAppointment.donor.email}
+  - Blood Type: ${populatedAppointment.donor.bloodType}
+  - Appointment Date: ${formattedDate}
+  - Appointment Time: ${populatedAppointment.time}
+  
+  Please log into the Lifelink app to manage the appointment.
+  `
       );
-
-      res.status(200).json({ message: 'Appointment booked successfully' });
+  
+      res.status(200).json({
+        message: 'Appointment booked successfully',
+        appointment: {
+          donorName: populatedAppointment.donor.fullName,
+          donorEmail: populatedAppointment.donor.email,
+          hospitalName: populatedAppointment.hospital.fullName,
+          bloodType: populatedAppointment.donor.bloodType,
+          date: formattedDate,
+          time: populatedAppointment.time,
+          status: populatedAppointment.status,
+        }
+      });
+      
     } catch (err) {
-      res.status(500).json({ message: 'Error booking appointment' });
+      console.error(err);
+      res.status(500).json({ message: 'Error booking appointment: ' + err.message });
     }
   };
-
+    
 exports.deleteDonor = async (req, res) => {
     try {
       const donor = await donorModel.findByIdAndDelete(req.params.id);
