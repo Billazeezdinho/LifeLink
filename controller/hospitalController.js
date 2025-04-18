@@ -226,8 +226,30 @@ exports.getHospitalProfile = async (req, res) => {
   }
 };
 
+exports.getOneHospital = async (req, res) => {
+  try {
+    const { hospitalId } = req.params;
+    const hospital = await hospitalModel.findById(hospitalId).select('-password'); 
 
-// In hospitalController.js
+    if (!hospital) {
+      return res.status(404).json({ 
+        message: 'Hospital not found.' 
+      });
+    }
+
+    res.status(200).json({
+      message: 'Hospital fetched successfully',
+      hospital,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+       message: 'Server error' + error.message 
+
+    });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   upload.single('profilePicture')(req, res, async (err) => {
     if (err) {
