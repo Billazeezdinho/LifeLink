@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
@@ -236,6 +236,106 @@ router.get("/donations/:status", auth, getDonationsByStatus);
  */
 
 router.get('/donor/notifications', auth, getDonorNotifications);
+
+/**
+ * @swagger
+ * /donor/appointments:
+ *   get:
+ *     summary: Get all scheduled donations for a donor
+ *     tags: [Donor Appointments]
+ *     security:
+ *       - bearerAuth: []  # Token auth required
+ *     responses:
+ *       200:
+ *         description: List of donor appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Donor appointments fetched successfully
+ *                 appointments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 6630abc123456789
+ *                       hospital:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                             example: Life Hospital
+ *                           address:
+ *                             type: string
+ *                             example: 123 Health Street
+ *                       date:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-05-01T00:00:00.000Z
+ *                       time:
+ *                         type: string
+ *                         example: 10:00 AM
+ *                       status:
+ *                         type: string
+ *                         example: pending
+ *       401:
+ *         description: Unauthorized - Token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/donor/appointments', auth, getDonorAppointments);
+
+
+/**
+ * @swagger
+ * /donor/appointments/{appointmentId}/cancel:
+ *   put:
+ *     summary: Cancel a scheduled donation appointment
+ *     tags: [Donor Appointments]
+ *     security:
+ *       - bearerAuth: []  # Token auth required
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the appointment to cancel
+ *     responses:
+ *       200:
+ *         description: Appointment cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Appointment cancelled successfully
+ *                 appointment:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6630abc123456789
+ *                     status:
+ *                       type: string
+ *                       example: cancelled
+ *       400:
+ *         description: Appointment already cancelled
+ *       404:
+ *         description: Appointment not found
+ *       401:
+ *         description: Unauthorized - Token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+router.put('/donor/appointments/:appointmentId/cancel', auth, cancelAppointment);
 
 /**
  * @swagger

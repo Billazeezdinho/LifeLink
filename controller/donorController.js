@@ -152,6 +152,63 @@ exports.getDashboard = async (req, res) => {
       })
     }
 }
+
+exports.getDonorAppointments = async (req, res) => {
+  try {
+    const donorId = req.user._id; 
+    const appointments = await appointmentModel.find({ donor: donorId })
+      .populate('hospital', 'name address email location') 
+      .sort({ date: 1 }); 
+
+    res.status(200).json({
+      message: 'Donor appointments fetched successfully',
+      appointments
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Internal server error: ' + error.message
+    });
+  }
+};
+
+exports.cancelAppointment = async (req, res) => {
+  try {
+    const donorId = req.user._id;
+    const { appointmentId } = req.params;
+
+    const appointment = await appointmentModel.findOne({
+      _id: appointmentId,
+      donor: donorId
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        message: 'Appointment not found'
+      });
+    }
+
+    if (appointment.status === 'cancelled') {
+      return res.status(400).json({
+        message: 'Appointment already cancelled'
+      });
+    }
+
+    appointment.status = 'cancelled';
+    await appointment.save();
+
+    res.status(200).json({
+      message: 'Appointment cancelled successfully',
+      appointment
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Internal server error: ' + error.message
+    });
+  }
+};
+
   exports.scheduleDonation = async (req, res)=> {
     try {
       const {date, hospitalId} = req.body;
@@ -433,7 +490,7 @@ exports.bookAppointment = async (req, res) => {
       });
   
       await appointment.save();
-      const populatedAppointment = await appointmentModel.findById(appointment._id).populate('donor', 'fullName email bloodType').populate('hospital', 'fullName email');
+      const populatedAppointment = await appointmentModel.findById(appointment._id).populate('donors', 'fullName email bloodType').populate('hospital', 'fullName email');
   
       // Format date 
       const formattedDate = moment(populatedAppointment.date).format('YYYY-MM-DD');
