@@ -213,7 +213,7 @@ exports.getHospitalProfile = async (req, res) => {
     console.log("hospital Role:", req.user.role);
     console.log("req.user:", req.user);
 
-    const hospital = await hospitalModel.findById(req.user.id).select('-password'); // omit password if present
+    const hospital = await hospitalModel.findById(req.user.id).select('-password');
 
     if (!hospital) {
       return res.status(404).json({ message: 'Hospital not found' });

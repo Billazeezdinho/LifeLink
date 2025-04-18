@@ -199,7 +199,7 @@ exports.getDashboard = async (req, res) => {
       
     }
   }
-  exports.logOut = async (req, res)=>{
+exports.logOut = async (req, res)=>{
     try {
       const token = req.headers.authorization?.split(' ')[1];
       let cancelToken = new Set();
