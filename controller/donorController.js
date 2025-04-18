@@ -229,34 +229,48 @@ exports.cancelAppointment = async (req, res) => {
       })
     }
   }
-  exports.getDonationsByStatus = async (req, res) => {
-    try {
-      const { status } = req.params;
-      const donor = await donorModel.findById(req.user._id);
-      if(!donor){
-        return res.status(404).json({
-          message: "Donor Not Found "
-        })
-      }
-      if(donor.status !== status){
-        return res.status(404).json({
-          message: `No ${status} donations found`
-        })
-      }
-      const token = generatedToken(donor._id)
-      res.status(200).json({
-        status: donor.status,
-        token
-      })
-      
-    } catch (error) {
-      res.status(500).json({
-        message: "internal Server Error" + error.message
-      })
-      
+  
+exports.getDonationsByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+
+    const donor = await donorModel.findById(req.user._id);
+    if (!donor) {
+      return res.status(404).json({
+        message: "Donor not found"
+      });
     }
+
+    const donations = await appointmentModel.find({ 
+      donor: donor._id, 
+      status 
+    }).populate({
+      path: 'hospital',
+      select: 'fullName address phoneNumber phone profilePicture city location' 
+    });
+
+    if (donations.length === 0) {
+      return res.status(404).json({
+        message: `No ${status} donations found`
+      });
+    }
+
+    const token = generatedToken(donor._id);
+
+    res.status(200).json({
+      message: `${status} donations fetched successfully`,
+      donations,
+      token
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Internal Server Error: " + error.message
+    });
   }
-  exports.getDonorNotifications = async (req, res) => {
+};
+exports.getDonorNotifications = async (req, res) => {
     try {
       const donor = await donorModel.findById(req.user.id).populate('notifications.from', 'fullName email');
       
