@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const appointmentSchema = new mongoose.Schema({
   donor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Donor', // Assuming you have a Donor model
+    ref: 'Donor',
     required: true,
   },
   hospital: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Hospital', // Assuming you have a Hospital model
+    ref: 'Hospital',
     required: true,
   },
   date: {

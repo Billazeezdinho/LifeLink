@@ -8,7 +8,7 @@
   const{ stringifyPhoneNumber}  = require('../utils/phoneNumber')
   const fs = require("fs");
 const hospitalModel = require('../model/hospitalModel');
-const appointmentModel = require('../model/appointmentModel');
+const {appointmentModel} = require('../model/appointmentModel');
 
 const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
