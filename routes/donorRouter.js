@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications } = require('../controller/donorController');
 const { registerValidate } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
@@ -196,6 +196,46 @@ router.post("/schedule", auth, scheduleDonation);
  *         description: Internal server error
  */
 router.get("/donations/:status", auth, getDonationsByStatus);
+
+/**
+ * @swagger
+ * /donor/notifications:
+ *   get:
+ *     summary: Get donor notifications
+ *     tags: [Donor]
+ *     description: Fetch the notifications for a donor.
+ *     security:
+ *       - bearerAuth: []  # Indicating that this endpoint requires JWT authentication
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved donor notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       message:
+ *                         type: string
+ *                         example: "A new appointment has been scheduled."
+ *                       from:
+ *                         type: string
+ *                         example: "Hospital XYZ"
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         example: "2025-04-20"
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/donor/notifications', auth, getDonorNotifications);
 
 /**
  * @swagger

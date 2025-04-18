@@ -199,6 +199,25 @@ exports.getDashboard = async (req, res) => {
       
     }
   }
+  exports.getDonorNotifications = async (req, res) => {
+    try {
+      const donor = await donorModel.findById(req.user.id).populate('notifications.from', 'fullName email');
+      
+      if (!donor) {
+        return res.status(404).json({ message: 'Donor not found.' });
+      }
+  
+      res.status(200).json({
+        message: 'Notifications fetched successfully',
+        notifications: donor.notifications,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: 'Error fetching notifications: ' + error.message,
+      });
+    }
+  };
 exports.logOut = async (req, res)=>{
     try {
       const token = req.headers.authorization?.split(' ')[1];
