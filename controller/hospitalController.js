@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
 const sendMail = require("../utils/email");
+const welcomeMail = require("../utils/hospitalWelcome");
 const email  = require("../utils/email");
 require("dotenv").config(); 
 const BloodRequest = require('../model/bloodRequestModel');
@@ -52,11 +53,22 @@ exports.register =async (req, res) => {
       city: city.trim().toLowerCase(),
     });
 
+      const token = await jwt.sign({ hospitalId: hospital._id }, process.env.key, { expiresIn: "10mins" });
+        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        // `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
+        const hospitalName = hostipal.fullName.split(" ")[0];
+        const mailDetails = {
+        email: hospital.email,
+        subject: "Welcome to LIFELINK",
+        html: welcomeMail(hospitalName, link),
+      };
     await hospital.save();
+    await sendMail(mailDetails)
 
     res.status(201).json({
       message: "Hospital created successfully",
       data: hospital,
+      token
     });
   } catch (error) {
     res.status(500).json({

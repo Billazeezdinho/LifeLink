@@ -39,14 +39,15 @@ exports.register = async (req, res) => {
           age
         });
         const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
-        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        const link = `https://dev-lifelink.vercel.app/verifymail/${token}`
         // `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
         const firstName = donor.fullName.split(" ")[0];
         const mailDetails = {
         email: donor.email,
-        subject: "Welcome to LIFELINK",
+        subject: "🌹 Welcome to LIFELINK",
         html: welcomeMail(firstName, link),
       };
+
       await donor.save();
       await sendMail(mailDetails);
         res.status(201).json({
@@ -89,12 +90,13 @@ exports.verifyDonors = async (req, res) => {
     
             // Generate a new token
             const newToken = jwt.sign(
-              { DonorId: donor._id },
+              { donorId: donor._id },
               process.env.key,
               { expiresIn: '3mins' }
             );
     
-            const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
+            const link = `https://dev-lifelink.vercel.app/verifymail/${newToken}`
+            // `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
             const firstName = donor.fullName.split(' ')[0];
     
             // Send verification email
@@ -157,7 +159,7 @@ exports.resendVerificationEmail = async (req, res) =>{
           })
         }
         const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
-        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        const link = `https://dev-lifelink.vercel.app/verifymail/${token}`
         // `${req.protocol}://${req.get('host')}/api/v1/verify-user/${token}`
     
         const firstName = donor.fullName.split( ' ')[0];

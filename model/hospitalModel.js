@@ -8,6 +8,7 @@ const HospitalSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String },
   address: { type: String },
+  isVerified: {type: Boolean, default: false},
   city: { type: String },
   state: { type: String },
   profilePicture: { type: String },
