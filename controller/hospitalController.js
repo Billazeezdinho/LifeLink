@@ -177,7 +177,7 @@ exports.login = async (req, res) => {
     }
   };
   
-  exports.getBloodRequestHistory = async (req, res) => {
+exports.getBloodRequestHistory = async (req, res) => {
     try {
       // Ensure the user is a hospital
       if (req.user.role !== 'hospital') {
@@ -295,7 +295,6 @@ exports.updateProfile = async (req, res) => {
   });
 };
 
-
 exports.deleteAccount = async (req, res) => {
   const hospitalId = req.user.id; // Assuming the user ID is stored in req.user.id
 
@@ -314,8 +313,6 @@ exports.deleteAccount = async (req, res) => {
     res.status(500).json({ message: 'Error deleting account' });
   }
 };
-
-
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -344,7 +341,6 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ message: 'Error sending password reset email', error: error.message });
   }
 };
-
 
 exports.resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;

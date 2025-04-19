@@ -36,6 +36,8 @@ const donorSchema = new mongoose.Schema(
   },
     gender: {
       type: String,
+      trim: true,
+      enum: ['male', 'female', 'other']
     },
     phoneNumber: {
       type: String,

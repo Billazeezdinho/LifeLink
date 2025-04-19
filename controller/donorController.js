@@ -9,6 +9,8 @@
   const fs = require("fs");
 const hospitalModel = require('../model/hospitalModel');
 const {appointmentModel} = require('../model/appointmentModel');
+const moment = require('moment');
+
 
 const generatedToken = (id) => {
     return jwt.sign({ id}, process.env.key, { expiresIn: "1d" });
@@ -37,7 +39,8 @@ exports.register = async (req, res) => {
           age
         });
         const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
-        const link = `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
+        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        // `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
         const firstName = donor.fullName.split(" ")[0];
         const mailDetails = {
         email: donor.email,
@@ -629,6 +632,17 @@ exports.bookAppointment = async (req, res) => {
        message: "Hospital not found." 
       });
       }
+      const donor =   req.user;
+      if (!donor) {
+        return res.status(404).json({
+          message: "Donor not found."
+        });
+      }
+      if (donor.isVerified) {
+        return res.status(403).json({
+          message: "You must verify your email before booking an appointment."
+        });
+      }
       const appointment = new appointmentModel({
         donor: req.user.id,
         hospital: hospitalId,
@@ -637,7 +651,7 @@ exports.bookAppointment = async (req, res) => {
       });
   
       await appointment.save();
-      const populatedAppointment = await appointmentModel.findById(appointment._id).populate('donors', 'fullName email bloodType').populate('hospital', 'fullName email');
+      const populatedAppointment = await appointmentModel.findById(appointment._id).populate('donor', 'fullName email bloodType').populate('hospital', 'fullName email');
   
       // Format date 
       const formattedDate = moment(populatedAppointment.date).format('YYYY-MM-DD');
