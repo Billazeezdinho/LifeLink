@@ -103,7 +103,7 @@ exports.verifyDonors = async (req, res) => {
             const mailDetails = {
               email: donor.email,
               subject: 'Verification Link',
-              html: welcomeMail(link, firstName),
+              html: welcomeMail(firstName, link),
             };
             await sendMail(mailDetails);
     
