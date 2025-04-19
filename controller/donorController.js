@@ -344,6 +344,11 @@ exports.scheduleDonation = async (req, res)=> {
           message: 'You cannot select today or a past date. Please choose a future date.'
         });
       }
+      if (!donor.isVerified) {
+        return res.status(403).json({
+          message: 'You must verify your email before scheduling a donation.'
+        });
+      }
       const updated = await donorModel.findByIdAndUpdate(req.user._id, { status: 'pending'}, {new: true});
       const token = generatedToken(updated._id);
       res.status(201).json({

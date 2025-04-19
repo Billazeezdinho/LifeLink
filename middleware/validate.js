@@ -25,14 +25,14 @@ exports.registerValidate = async (req, res, next) =>{
         }),
 
         password: Joi.string()
+        .min(6)
         .required()
-        .min(5)
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{5,}$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/)
         .messages({
-            "any.required": "Password is required",
             "string.empty": "Password cannot be empty",
-            "string.min": "Password must be at least 5 characters long",
-            "string.pattern.base": "Password must be minimum of 5 character and include at least one UpperCase, one Lowercase, one number and a special character [!@#$%^&*].",
+            "string.min": "Password must be at least 6 characters long",
+            "string.pattern.base": "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character [!@#$%^&*]",
+            "any.required": "Password is required"
         }),
         bloodType: Joi.string()
         .required()
