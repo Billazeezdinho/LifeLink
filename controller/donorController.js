@@ -27,7 +27,6 @@ exports.register = async (req, res) => {
         //Salt and hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-    
         //Create user
         const donor = new donorModel({
           fullName: fullName.trim(),
@@ -37,12 +36,13 @@ exports.register = async (req, res) => {
           location, 
           age
         });
-        
+        const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
+        const link = `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
         const firstName = donor.fullName.split(" ")[0];
         const mailDetails = {
         email: donor.email,
         subject: "Welcome to LIFELINK",
-        html: welcomeMail(firstName),
+        html: welcomeMail(firstName, link),
       };
       await donor.save();
       await sendMail(mailDetails);
@@ -50,14 +50,130 @@ exports.register = async (req, res) => {
           message: "Donor created successfully",
           data: donor,
         });
-      } catch (error) {
-        console.log(error.message);
+} catch (error){
         res.status(500).json({
           message: "Internal server error " + error.message,
         });
       }
     };
 
+exports.verifyDonors = async (req, res) => {
+      try {
+        const { token } = req.params;
+    
+        let payload;
+        try {
+          payload = jwt.verify(token, process.env.key);
+        } catch (error) {
+          if (error instanceof jwt.TokenExpiredError) {
+            // Decode the token to get donor info
+            const decodedToken = jwt.decode(token);
+            if (!decodedToken) {
+              return res.status(400).json({ message: 'Invalid Token' });
+            }
+    
+            const donor = await donorModel.findById(decodedToken.donorId);
+            if (!donor){
+              return res.status(404).json({ message: 'Donor not found' });
+            }
+    
+            if (donor.isVerified) {
+              return res.status(400).json({
+                message: 'Donor has already been verified. Please proceed to login.',
+              });
+            }
+    
+            // Generate a new token
+            const newToken = jwt.sign(
+              { DonorId: donor._id },
+              process.env.key,
+              { expiresIn: '3mins' }
+            );
+    
+            const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
+            const firstName = donor.fullName.split(' ')[0];
+    
+            // Send verification email
+            const mailDetails = {
+              email: donor.email,
+              subject: 'Verification Link',
+              html: welcomeMail(link, firstName),
+            };
+            await sendMail(mailDetails);
+    
+            return res.status(200).json({
+              message: 'Verification link expired. A new link has been sent to your email.',
+            });
+          }
+    
+          return res.status(400).json({ message: 'Invalid token' });
+        }
+    
+        // Token is valid, verify user
+        const user = await donorModel.findById(payload.donorId);
+        if (!user) {
+          return res.status(404).json({ message: 'Donor not found' });
+        }
+    
+        if (user.isVerified) {
+          return res.status(400).json({
+            message: 'User has already been verified. Please proceed to login.',
+          });
+        }
+    
+        user.isVerified = true;
+        await user.save();
+    
+        res.status(200).json({
+          message: 'Account verified successfully',
+        });
+      } catch (error) {
+        return res.status(500).json({
+          message: 'Internal Server Error' + error.message
+        });
+      }
+    };
+exports.resendVerificationEmail = async (req, res) =>{
+      try{
+        const { email } = req.body;
+        if(!email){
+          return res.status(400).json({
+            message: ' Please enter Email Address'
+          })
+        };
+        const donor = await donorModel.findOne({email: email.toLowerCase()});
+        if (donor == null){
+          return res.status(404).json({
+            message: 'Donor Not Found'
+          })
+        };
+        if(donor.isVerified === true ){
+          return res.status(400).json({
+            message: 'Donor has already been verified, please proceed to login'
+          })
+        }
+        const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
+        const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${token}`
+    
+        const firstName = donor.fullName.split( ' ')[0];
+    
+        const mailDetails = {
+          email: donor.email,
+          subject: 'Verification Link',
+          html: welcomeMail(firstName, link)
+        };
+        await sendMail(mailDetails);
+        res.status(200).json({
+          message: 'New verification link sent, please check your email'
+        });
+    
+      }catch(error){
+        console.log(error.message)
+        res.status(500).json({
+          message: 'Internal Server Error'
+        })
+      }
+    } 
 exports.login = async (req, res)=>{
       try{
         const {email, password} = req.body;
@@ -209,13 +325,24 @@ exports.cancelAppointment = async (req, res) => {
   }
 };
 
-  exports.scheduleDonation = async (req, res)=> {
+exports.scheduleDonation = async (req, res)=> {
     try {
       const {date, hospitalId} = req.body;
+      
       if (!date || !hospitalId ){
         return res.status(400).json({
           message: 'Date and hospital are required'
         })
+      }
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+  
+      if (selectedDate <= today) {
+        return res.status(400).json({
+          message: 'You cannot select today or a past date. Please choose a future date.'
+        });
       }
       const updated = await donorModel.findByIdAndUpdate(req.user._id, { status: 'pending'}, {new: true});
       const token = generatedToken(updated._id);

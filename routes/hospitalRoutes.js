@@ -469,7 +469,7 @@ router.put("/appointments/:appointmentId/respond", auth, respondToAppointment);
 
 /**
  * @swagger
- * /hospital/profile:
+ * /hospital/profile/one:
  *   get:
  *     summary: Get hospital profile
  *     tags: [Hospital]
@@ -488,7 +488,7 @@ router.put("/appointments/:appointmentId/respond", auth, respondToAppointment);
  *         description: Internal server error
  */
 
-router.get('/hospital/profile', auth, roleAuth(['hospital']), getHospitalProfile);
+router.get('/hospital/profile/one', auth, roleAuth(['hospital']), getHospitalProfile);
 
 
 /**

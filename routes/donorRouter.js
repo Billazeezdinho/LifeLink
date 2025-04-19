@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor,getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments } = require('../controller/donorController');
-const { registerValidate } = require('../middleware/validate');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor, getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments, verifyDonors, resendVerificationEmail } = require('../controller/donorController');
+const { registerValidate, loginValidator } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
 
@@ -53,6 +53,51 @@ const upload= require('../utils/multer');
  */
 router.post("/register", registerValidate, register);
 
+
+/**
+ * @swagger
+ * /verify-user/{token}:
+ *   get:
+ *     summary: Verify Donor via email token
+ *     tags: [Donor]
+ *     parameters:
+ *       - name: token
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "someVerificationToken"
+ *     responses:
+ *       200:
+ *         description: Donor verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.get('/verify-donor/:token', verifyDonors);
+
+/**
+ * @swagger
+ * /re-verify:
+ *   get:
+ *     summary: Resend verification email
+ *     tags: [Donor]
+ *     description: Verification of email 
+ *     parameters:
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Donor's email address
+ *         example: LifeLink@mail.com
+ *     responses:
+ *       200:
+ *         description: Verification email sent successfully
+ *       400:
+ *         description: Donor is already verified
+ */
+router.get('/re-verify', resendVerificationEmail);
+
 /**
  * @swagger
  * /login:
@@ -83,7 +128,7 @@ router.post("/register", registerValidate, register);
  *       500:
  *         description: Internal server error
  */
-router.post("/login", login);
+router.post("/login",loginValidator, login);
 
 /**
  * @swagger
@@ -265,8 +310,8 @@ router.post("/schedule", auth, scheduleDonation);
  *               type: object
  *               properties:
  *                 message:
- *                   type: string
- *                   example: Internal Server Error: something went wrong
+ *                   type: object
+ *                   example: 'Internal Server Error: something went wrong'
  */
 router.get("/donations/:status", auth, getDonationsByStatus);
 

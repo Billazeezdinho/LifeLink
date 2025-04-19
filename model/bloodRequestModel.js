@@ -20,6 +20,7 @@ const bloodRequestSchema = new mongoose.Schema({
   },
   urgencyLevel: {
     type: String,
+    lowercase: true,
     enum: ['low', 'medium', 'high'],
     default: 'medium',
   },

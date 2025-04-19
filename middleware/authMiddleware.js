@@ -22,13 +22,14 @@ const auth = async (req, res, next) => {
   
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.key); // Use a more descriptive variable name for the secret
+    console.log('Decode',decoded)
     let user;
 
     // Check which model the user belongs to (donor, hospital, or admin)
     user = (await donorModel.findById(decoded.id)) || 
            (await hospitalModel.findById(decoded.id)) || 
            (await adminModel.findById(decoded.id));
-
+           console.log('User',user)
     // If user is not found
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -46,7 +47,10 @@ const auth = async (req, res, next) => {
 // Middleware for role-based authorization
 const roleAuth = (allowedRoles) => {
   return (req, res, next) => {
+    console.log('Here')
     try {
+      
+      console.log(req.user.role)
       const userRole = req.user.role;
       
       // Check if the user's role is allowed

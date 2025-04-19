@@ -59,7 +59,6 @@ exports.register =async (req, res) => {
       data: hospital,
     });
   } catch (error) {
-    console.log(error.message);
     res.status(500).json({
       message: "Internal server error " + error.message,
     });
@@ -93,9 +92,7 @@ exports.login = async (req, res) => {
       hospital.role = 'hospital'; // Also update the local object
     }
 
-    console.log('Hospital Role:', hospital.role);
-
-    const token = jwt.sign(
+      const token = jwt.sign(
       { id: hospital._id, role: hospital.role }, // Now guaranteed to be lowercase
       process.env.key,
       { expiresIn: '1d' }
@@ -108,7 +105,6 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error.message);
     res.status(500).json({
       message: 'Internal Server Error ' + error.message
     });
@@ -118,8 +114,7 @@ exports.login = async (req, res) => {
 
   exports.searchForDonors = async (req, res) => {
     try {
-      console.log(req.user);  // Debugging line to see the user data
-  
+      
       if (req.user.role !== 'hospital') {
         return res.status(403).json({ message: 'Access denied. Only hospitals can search for donors.' });
       }
@@ -178,7 +173,6 @@ exports.login = async (req, res) => {
   
       res.status(201).json({ message: 'Blood request submitted successfully', data: responseData });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   };
@@ -196,22 +190,19 @@ exports.login = async (req, res) => {
           // Sort by date, most recent first
         .select('bloodGroup numberOfPints preferredDate urgencyLevel amount status createdAt updatedAt'); // Explicitly select fields
   
-      console.log('Fetched requests:', requests);
       if (requests.length === 0) {
         return res.status(404).json({ message: 'No blood requests found for this hospital.' });
       }
   
       res.status(200).json({ requests });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: 'Server error, please try again later.' });
     }
   };
 
 exports.getHospitalProfile = async (req, res) => {
   try {
-    console.log("hospital Role:", req.user.role);
-    console.log("req.user:", req.user);
+    
 
     const hospital = await hospitalModel.findById(req.user.id).select('-password');
 
@@ -221,7 +212,7 @@ exports.getHospitalProfile = async (req, res) => {
 
     res.status(200).json({ hospital });
   } catch (error) {
-    console.error(error);
+    
     res.status(500).json({ message: 'Server error, please try again later.' });
   }
 };
@@ -242,7 +233,7 @@ exports.getOneHospital = async (req, res) => {
       hospital,
     });
   } catch (error) {
-    console.error(error);
+    
     res.status(500).json({
        message: 'Server error' + error.message 
 
@@ -298,7 +289,7 @@ exports.updateProfile = async (req, res) => {
         data: updatedHospital,
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      
       res.status(500).json({ message: 'Error updating profile' });
     }
   });
@@ -319,7 +310,7 @@ exports.deleteAccount = async (req, res) => {
       message: 'Account deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting account:', error);
+    
     res.status(500).json({ message: 'Error deleting account' });
   }
 };
@@ -350,7 +341,6 @@ exports.forgotPassword = async (req, res) => {
       token: token // Include the token in the response
     });
   } catch (error) {
-    console.error('Error sending password reset email:', error);
     res.status(500).json({ message: 'Error sending password reset email', error: error.message });
   }
 };
@@ -384,14 +374,13 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Error resetting password:', error);
-    res.status(500).json({ message: 'Error resetting password', error: error.message });
+   
+    res.status(500).json({ message: 'Error resetting password' + error.message });
   }
 };
 
 exports.submitKYC = async (req, res) => {
   try {
-    console.log('--- Incoming KYC Request ---');
     const { hospitalId } = req.user; // Hospital ID from the user object
     const { licenseNumber } = req.body;
     const files = req.files;
@@ -408,7 +397,6 @@ exports.submitKYC = async (req, res) => {
       }
 
       if (existingKYC.status === 'declined') {
-        console.log('Previous KYC was declined. Deleting and allowing resubmission.');
         await KYC.findByIdAndDelete(existingKYC._id); // Delete the old declined KYC document
       }
     }
@@ -433,7 +421,6 @@ exports.submitKYC = async (req, res) => {
 
     res.status(201).json({ message: 'KYC submitted successfully', kycData });
   } catch (error) {
-    console.error('KYC Error:', error);
     res.status(500).json({ message: 'KYC submission failed', error: error.message });
   }
 };
@@ -451,7 +438,6 @@ exports.getHospitalAppointments = async (req, res) => {
 
     res.status(200).json({ appointments });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error while fetching appointments. " + error.message });
   }
 };
@@ -503,7 +489,6 @@ LifeLink Team`
 
     res.status(200).json({ message: `Appointment ${status} successfully.` });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error while responding to appointment." + error.message });
   }
 };

@@ -29,8 +29,11 @@ const donorSchema = new mongoose.Schema(
     age: {
       type: String,
       required: true,
-    
     },
+    isVerified:{
+    type: Boolean,
+    default: false
+  },
     gender: {
       type: String,
     },
