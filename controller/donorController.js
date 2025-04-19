@@ -49,6 +49,7 @@ exports.register = async (req, res) => {
         res.status(201).json({
           message: "Donor created successfully",
           data: donor,
+          token
         });
 } catch (error){
         res.status(500).json({
