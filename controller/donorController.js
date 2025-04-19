@@ -157,7 +157,8 @@ exports.resendVerificationEmail = async (req, res) =>{
           })
         }
         const token = await jwt.sign({ donorId: donor._id }, process.env.key, { expiresIn: "10mins" });
-        const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${token}`
+        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        // `${req.protocol}://${req.get('host')}/api/v1/verify-user/${token}`
     
         const firstName = donor.fullName.split( ' ')[0];
     

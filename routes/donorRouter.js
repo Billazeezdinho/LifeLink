@@ -78,25 +78,34 @@ router.get('/verify-donor/:token', verifyDonors);
 /**
  * @swagger
  * /re-verify:
- *   get:
+ *   post:
  *     summary: Resend verification email
  *     tags: [Donor]
- *     description: Verification of email 
- *     parameters:
- *       - in: query
- *         name: email
- *         schema:
- *           type: string
- *         required: true
- *         description: Donor's email address
- *         example: LifeLink@mail.com
+ *     description: Resend a verification email to the donor.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: LifeLink@mail.com
  *     responses:
  *       200:
- *         description: Verification email sent successfully
+ *         description: New verification link sent successfully.
  *       400:
- *         description: Donor is already verified
+ *         description: Donor is already verified or email is missing.
+ *       404:
+ *         description: Donor not found.
+ *       500:
+ *         description: Internal server error.
  */
-router.get('/re-verify', resendVerificationEmail);
+
+router.post('/re-verify', resendVerificationEmail);
 
 /**
  * @swagger
