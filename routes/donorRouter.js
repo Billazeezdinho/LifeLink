@@ -56,7 +56,7 @@ router.post("/register", registerValidate, register);
 
 /**
  * @swagger
- * /verify-user/{token}:
+ * /verify-donor/{token}:
  *   get:
  *     summary: Verify Donor via email token
  *     tags: [Donor]
