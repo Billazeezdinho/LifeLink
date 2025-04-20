@@ -358,7 +358,7 @@ exports.scheduleDonation = async (req, res)=> {
           message: "Donor not found."
         });
       }
-      if (donor.isVerified) {
+      if (!donor.isVerified) {
         return res.status(403).json({
           message: 'You must verify your email before scheduling a donation.'
         });
@@ -659,7 +659,7 @@ exports.bookAppointment = async (req, res) => {
           message: "Donor not found."
         });
       }
-      if (donor.isVerified) {
+      if (!donor.isVerified) {
         return res.status(403).json({
           message: "You must verify your email before booking an appointment."
         });
