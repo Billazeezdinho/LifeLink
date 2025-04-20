@@ -39,6 +39,12 @@ exports.register =async (req, res) => {
         message: `Email ${email} is already registered`,
       });
     }
+    const donorExists = await donorModel.findOne({ email: email.toLowerCase()});
+    if(donorExists){
+      return res.status(400).json({
+        message:  `Email ${email} is already a registered Donor`
+      })
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -251,7 +257,7 @@ exports.login = async (req, res) => {
       if (req.user.role !== 'hospital') {
         return res.status(403).json({ message: 'Access denied. Only hospitals can search for donors.' });
       }
-  
+      
       if (!req.user.isKycVerified) {
         return res.status(400).json({ message: 'You are yet to complete your KYC, check your email and complete it.' });
       }
@@ -310,7 +316,7 @@ exports.login = async (req, res) => {
     }
   };
  
-  exports.getBloodRequestHistory = async (req, res) => {
+  exports.getAppointmentHistory = async (req, res) => {
     try {
       // Ensure the user is a hospital
       if (req.user.role !== 'hospital') {
@@ -335,30 +341,29 @@ exports.login = async (req, res) => {
   };
   
 
-// exports.getBloodRequestHistory = async (req, res) => {
-//     try {
-//       // Ensure the user is a hospital
-//       if (req.user.role !== 'hospital') {
-//         return res.status(403).json({ message: 'Only hospitals can view their blood request history' });
-//       }
-//       console.log('User:', req.user); // Log the whole user object
-//       console.log('User ID:', req.user.id); // Log the ID specifically
+exports.getBloodRequestHistory = async (req, res) => {
+    try {
+      // Ensure the user is a hospital
+      if (req.user.role !== 'hospital') {
+        return res.status(403).json({ message: 'Only hospitals can view their blood request history' });
+      }
+      
 
-//       // Fetch the hospital's blood request history
-//       const requests = await BloodRequest.find({ hospital: req.user.id })
-//         .sort({ createdAt: -1 })
-//           // Sort by date, most recent first
-//         .select('bloodGroup numberOfPints preferredDate urgencyLevel amount status createdAt updatedAt'); 
+      // Fetch the hospital's blood request history
+      const requests = await BloodRequest.find({ hospital: req.user.id })
+        .sort({ createdAt: -1 })
+          // Sort by date, most recent first
+        .select('bloodGroup numberOfPints preferredDate urgencyLevel amount status createdAt updatedAt'); 
   
-//       if (requests.length === 0) {
-//         return res.status(404).json({ message: 'No blood requests found for this hospital.' });
-//       }
+      if (requests.length === 0) {
+        return res.status(404).json({ message: 'No blood requests found for this hospital.' });
+      }
   
-//       res.status(200).json({ requests });
-//     } catch (error) {
-//       res.status(500).json({ message: 'Server error, please try again later.' });
-//     }
-//   };
+      res.status(200).json({ requests });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error, please try again later.' });
+    }
+  };
 
 exports.getHospitalProfile = async (req, res) => {
   try {
@@ -449,7 +454,6 @@ exports.updateProfile = async (req, res) => {
         data: updatedHospital,
       });
     } catch (error) {
-      
       res.status(500).json({ message: 'Error updating profile' });
     }
   });

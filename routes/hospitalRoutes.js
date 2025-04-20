@@ -17,6 +17,7 @@ const {
   getOneHospital,
   resendVerificationEmail,
   verifyHoospital,
+  getAppointmentHistory,
 } = require('../controller/hospitalController');
 
 // Import named exports from middleware
@@ -394,7 +395,47 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
 
 /**
  * @swagger
- * /hospital/history:
+ * /theAppointment/history:
+ *   get:
+ *     summary: Get appointment history for a hospital
+ *     tags: [Hospital]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of past appointment request for the hospital
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/BloodRequest'
+ *       403:
+ *         description: Forbidden – Only hospitals can view their Appointment history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Only hospitals can view their Appointment history.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+router.get('/theAppointment/history', auth, roleAuth(['hospital']), getAppointmentHistory);
+
+/**
+ * @swagger
+ * /re-hospital/history:
  *   get:
  *     summary: Get blood request history for a hospital
  *     tags: [Hospital]
@@ -430,7 +471,7 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
  *                   type: string
  *                   example: Internal Server Error
  */
-router.post('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
+router.get('/re-hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
 
 /**
  * @swagger
