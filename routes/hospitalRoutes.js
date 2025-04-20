@@ -174,10 +174,17 @@ router.post('/hospital/forgotPassword', forgotPassword);
 
 /**
  * @swagger
- * /hospital/resetPassword:
- *   post:
+ * /hospital/resetPassword/{token}:
+ *   patch:
  *     summary: Reset hospital password using token
  *     tags: [Hospital]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Password reset token
  *     requestBody:
  *       required: true
  *       content:
@@ -185,21 +192,21 @@ router.post('/hospital/forgotPassword', forgotPassword);
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
  *               newPassword:
  *                 type: string
+ *                 example: yourNewSecurePassword123
  *     responses:
  *       200:
- *         description: Password reset successfully
+ *         description: Password updated successfully
  *       400:
- *         description: Bad Request – Token and new password are required
+ *         description: Bad Request – Token or new password missing
  *       404:
- *         description: Not Found – Hospital not found
+ *         description: Hospital not found
  *       500:
  *         description: Internal server error
  */
-router.post('/hospital/resetPassword', auth, roleAuth(['hospital']), resetPassword);
+
+router.post('/hospital/resetPassword/:token', resetPassword);
 
 /**
  * @swagger

@@ -54,7 +54,7 @@ exports.register =async (req, res) => {
     });
 
       const token = await jwt.sign({ hospitalId: hospital._id }, process.env.key, { expiresIn: "10mins" });
-        const link = `https://dev-lifelink.vercel.app/verifymail${token}`
+        const link = `https://dev-lifelink.vercel.app/verifymail/${token}`
         // `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
         const hospitalName = hostipal.fullName.split(" ")[0];
         const mailDetails = {
@@ -459,16 +459,81 @@ exports.forgotPassword = async (req, res) => {
       return res.status(404).json({ message: 'Hospital not found' });
     }
 
-    // Generate the password reset token
     const token = jwt.sign({ id: hospital._id }, process.env.key, { expiresIn: '1h' });
 
-    // Send the reset email
-    await sendEmail(email, 'Password Reset', `Click the link to reset your password: ${process.env.FRONTEND_URL}/reset-password/${token}`);
+    const resetLink = `https://lifelink-xi.vercel.app/resetpassword/${token}`;
 
-    // Respond with the token for testing purposes
+    // HTML email content
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Password Reset</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f9fc;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            text-align: center;
+          }
+          .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #ffffff;
+            background: linear-gradient(90deg, #0077b6, #e63946);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+          }
+          .button:hover {
+            background: linear-gradient(90deg, #005f87, #c5303f);
+          }
+          .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Password Reset Request</h2>
+          <p>Hello,</p>
+          <p>We received a request to reset your password for your LifeLink account.</p>
+          <p>Click the button below to reset your password:</p>
+          <a href="${resetLink}" class="button">Reset Password</a>
+          <p>If you did not request this, please ignore this email.</p>
+          <div class="footer">
+            &copy; ${new Date().getFullYear()} LifeLink. All rights reserved.
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Send the reset email with HTML
+    await sendEmail(
+      email,
+      'Password Reset Request',
+      htmlContent
+    );
+
     res.status(200).json({
       message: 'Password reset link sent to your email',
-      token: token // Include the token in the response
+      token: token
     });
   } catch (error) {
     res.status(500).json({ message: 'Error sending password reset email', error: error.message });
@@ -476,18 +541,19 @@ exports.forgotPassword = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { token } = req.params; // 🔥 Get token from URL params
+  const { newPassword } = req.body; // 🔥 Get new password from request body
 
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
   }
 
   try {
-    // Decode the token to get hospital ID
-    const decoded = jwt.verify(token, process.env.key);
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.KEY);
     const hospitalId = decoded.id;
 
-    // Find the hospital by ID
+    // Find hospital by ID
     const hospital = await hospitalModel.findById(hospitalId);
     if (!hospital) {
       return res.status(404).json({ message: 'Hospital not found' });
@@ -497,16 +563,19 @@ exports.resetPassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update the hospital's password
+    // Update password
     hospital.password = hashedPassword;
     await hospital.save();
 
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-   
-    res.status(500).json({ message: 'Error resetting password' + error.message });
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Token has expired. Please request a new password reset link.' });
+    }
+    res.status(500).json({ message: 'Error resetting password: ' + error.message });
   }
 };
+
 
 exports.submitKYC = async (req, res) => {
   try {
