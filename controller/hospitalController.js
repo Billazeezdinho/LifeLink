@@ -630,11 +630,13 @@ exports.getHospitalAppointments = async (req, res) => {
     }
 
     const appointments = await appointmentModel
-      .find({ hospital: req.user.id })
+      .find({ hospital: req.user._id })
       .populate("donor", "fullName email bloodType phoneNumber")
       .sort({ createdAt: -1 }); // Latest first
 
-    res.status(200).json({ appointments });
+    res.status(200).json({
+      message: 'Appointment fetched successfully',
+      data: appointments });
   } catch (error) {
     res.status(500).json({ message: "Server error while fetching appointments. " + error.message });
   }

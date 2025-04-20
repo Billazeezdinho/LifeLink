@@ -358,7 +358,7 @@ exports.scheduleDonation = async (req, res)=> {
           message: "Donor not found."
         });
       }
-      if (!donor.isVerified) {
+      if (donor.isVerified) {
         return res.status(403).json({
           message: 'You must verify your email before scheduling a donation.'
         });
@@ -676,24 +676,29 @@ exports.bookAppointment = async (req, res) => {
   
       // Format date 
       const formattedDate = moment(populatedAppointment.date).format('YYYY-MM-DD');
-  
+      
+      if (!populatedAppointment.donor.email) {
+        return res.status(400).json({ message: "Donor email not found. Cannot send confirmation email." });
+      }
+      
       // Send email notification
-      await sendMail(
-        hospital.email,
-        'New Appointment Request',
-        `Hello ${hospital.fullName},
-  
-  A donor (${populatedAppointment.donor.fullName}) wants to book an appointment at your hospital.
-  
-  - Donor Name: ${populatedAppointment.donor.fullName}
-  - Donor Email: ${populatedAppointment.donor.email}
-  - Blood Type: ${populatedAppointment.donor.bloodType}
-  - Appointment Date: ${formattedDate}
-  - Appointment Time: ${populatedAppointment.time}
-  
-  Please log into the Lifelink app to manage the appointment.
-  `
-      );
+      
+        await sendMail({
+          email: populatedAppointment.hospital.email,
+          subject: 'New Appointment Request',
+          text: `Hello ${populatedAppointment.hospital.fullName}, ...          
+          A donor (${populatedAppointment.donor.fullName}) wants to book an appointment at your hospital.
+          
+          - Donor Name: ${populatedAppointment.donor.fullName}
+          - Donor Email: ${populatedAppointment.donor.email}
+          - Blood Type: ${populatedAppointment.donor.bloodType}
+          - Appointment Date: ${formattedDate}
+          - Appointment Time: ${populatedAppointment.time}
+          
+          Please log into the Lifelink app to manage the appointment.
+          `
+          });
+    
   
       res.status(200).json({
         message: 'Appointment booked successfully',
