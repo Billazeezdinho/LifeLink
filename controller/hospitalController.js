@@ -56,7 +56,7 @@ exports.register =async (req, res) => {
       const token = await jwt.sign({ hospitalId: hospital._id }, process.env.key, { expiresIn: "10mins" });
         const link = `https://dev-lifelink.vercel.app/verifymail/${token}`
         // `${req.protocol}://${req.get("host")}/api/v1/verify-user/${token}`;
-        const hospitalName = hostipal.fullName.split(" ")[0];
+        const hospitalName = hospital.fullName.split(" ")[0];
         const mailDetails = {
         email: hospital.email,
         subject: "Welcome to LIFELINK",
