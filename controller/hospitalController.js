@@ -309,29 +309,56 @@ exports.login = async (req, res) => {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   };
-  
-exports.getBloodRequestHistory = async (req, res) => {
+ 
+  exports.getBloodRequestHistory = async (req, res) => {
     try {
       // Ensure the user is a hospital
       if (req.user.role !== 'hospital') {
-        return res.status(403).json({ message: 'Only hospitals can view their blood request history' });
+        return res.status(403).json({ message: 'Only hospitals can view their appointment history' });
       }
   
-      // Fetch the hospital's blood request history
-      const requests = await BloodRequest.find({ hospital: req.user.id })
-        .sort({ createdAt: -1 })
-          // Sort by date, most recent first
-        .select('bloodGroup numberOfPints preferredDate urgencyLevel amount status createdAt updatedAt'); // Explicitly select fields
+      // Fetch the hospital's appointment history
+      const appointments = await appointmentModel.find({ hospital: req.user.id })
+        .sort({ date: -1 })  // Sort by date, most recent first
+        .populate('donor', 'fullName email bloodType')  // Populate donor details
+        .select('donor hospital date time status createdAt updatedAt'); // Explicitly select fields
   
-      if (requests.length === 0) {
-        return res.status(404).json({ message: 'No blood requests found for this hospital.' });
+      if (appointments.length === 0) {
+        return res.status(404).json({ message: 'No appointments found for this hospital.' });
       }
   
-      res.status(200).json({ requests });
+      res.status(200).json({ appointments });
     } catch (error) {
-      res.status(500).json({ message: 'Server error, please try again later.' });
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error, please try again later.' });
     }
   };
+  
+
+// exports.getBloodRequestHistory = async (req, res) => {
+//     try {
+//       // Ensure the user is a hospital
+//       if (req.user.role !== 'hospital') {
+//         return res.status(403).json({ message: 'Only hospitals can view their blood request history' });
+//       }
+//       console.log('User:', req.user); // Log the whole user object
+//       console.log('User ID:', req.user.id); // Log the ID specifically
+
+//       // Fetch the hospital's blood request history
+//       const requests = await BloodRequest.find({ hospital: req.user.id })
+//         .sort({ createdAt: -1 })
+//           // Sort by date, most recent first
+//         .select('bloodGroup numberOfPints preferredDate urgencyLevel amount status createdAt updatedAt'); 
+  
+//       if (requests.length === 0) {
+//         return res.status(404).json({ message: 'No blood requests found for this hospital.' });
+//       }
+  
+//       res.status(200).json({ requests });
+//     } catch (error) {
+//       res.status(500).json({ message: 'Server error, please try again later.' });
+//     }
+//   };
 
 exports.getHospitalProfile = async (req, res) => {
   try {

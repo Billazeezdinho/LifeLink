@@ -430,7 +430,7 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
  *                   type: string
  *                   example: Internal Server Error
  */
-router.get('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
+router.post('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
 
 /**
  * @swagger

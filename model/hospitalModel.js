@@ -15,6 +15,5 @@ const HospitalSchema = new mongoose.Schema({
   kycCompleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 
-// module.exports = mongoose.model('hospital', hospitalSchema);
 
 module.exports = mongoose.model('Hospital', HospitalSchema);

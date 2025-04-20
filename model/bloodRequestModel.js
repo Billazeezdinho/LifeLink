@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bloodRequestSchema = new mongoose.Schema({
   hospital: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'hospital',
+    ref: 'Hospital',
     required: true,
   },
   bloodGroup: {
