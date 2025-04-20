@@ -87,7 +87,7 @@ exports.verifyHoospital = async (req, res) => {
           payload = jwt.verify(token, process.env.key);
         } catch (error) {
           if (error instanceof jwt.TokenExpiredError) {
-            // Decode the token to get donor info
+            // Decode the token to get Hospital info
             const decodedToken = jwt.decode(token);
             if (!decodedToken) {
               return res.status(400).json({ message: 'Invalid Token' });
@@ -106,7 +106,7 @@ exports.verifyHoospital = async (req, res) => {
     
             // Generate a new token
             const newToken = jwt.sign(
-              { donorId: hospital._id },
+              { hospitalId: hospital._id },
               process.env.key,
               { expiresIn: '3mins' }
             );
@@ -117,7 +117,7 @@ exports.verifyHoospital = async (req, res) => {
     
             // Send verification email
             const mailDetails = {
-              email: donor.email,
+              email: hospitalName.email,
               subject: 'Verification Link',
               html: welcomeMail(hospitalName, link),
             };
