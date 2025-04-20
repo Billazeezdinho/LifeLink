@@ -77,6 +77,127 @@ exports.register =async (req, res) => {
   }
 };
 
+
+exports.verifyHoospital = async (req, res) => {
+      try {
+        const { token } = req.params;
+    
+        let payload;
+        try {
+          payload = jwt.verify(token, process.env.key);
+        } catch (error) {
+          if (error instanceof jwt.TokenExpiredError) {
+            // Decode the token to get donor info
+            const decodedToken = jwt.decode(token);
+            if (!decodedToken) {
+              return res.status(400).json({ message: 'Invalid Token' });
+            }
+    
+            const hospital = await hospitalModel.findById(decodedToken.hospitalId);
+            if (!hospital){
+              return res.status(404).json({ message: 'Hospital not found' });
+            }
+    
+            if (hospital.isVerified) {
+              return res.status(400).json({
+                message: 'hospital has already been verified. Please proceed to login.',
+              });
+            }
+    
+            // Generate a new token
+            const newToken = jwt.sign(
+              { donorId: hospital._id },
+              process.env.key,
+              { expiresIn: '3mins' }
+            );
+    
+            const link = `lifelink-xi.vercel.app/verifymail/${newToken}`
+            // `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
+            const hospitalName = hospital.fullName.split(' ')[0];
+    
+            // Send verification email
+            const mailDetails = {
+              email: donor.email,
+              subject: 'Verification Link',
+              html: welcomeMail(hospitalName, link),
+            };
+            await sendMail(mailDetails);
+    
+            return res.status(200).json({
+              message: 'Verification link expired. A new link has been sent to your email.',
+            });
+          }
+    
+          return res.status(400).json({ message: 'Invalid token' });
+        }
+    
+        // Token is valid, verify user
+        const user = await hospitalModel.findById(payload.hospitalId);
+        if (!user) {
+          return res.status(404).json({ message: 'Hospital not found' });
+        }
+    
+        if (user.isVerified) {
+          return res.status(400).json({
+            message: 'hospital has already been verified. Please proceed to login.',
+          });
+        }
+    
+        user.isVerified = true;
+        await user.save();
+    
+        res.status(200).json({
+          message: 'Account verified successfully',
+        });
+      } catch (error) {
+        return res.status(500).json({
+          message: 'Internal Server Error' + error.message
+        });
+      }
+    };
+exports.resendVerificationEmail = async (req, res) =>{
+      try{
+        const { email } = req.body;
+        if(!email){
+          return res.status(400).json({
+            message: ' Please enter Email Address'
+          })
+        };
+        const hospital = await hospitalModel.findOne({email: email.toLowerCase()});
+        if (hospital == null){
+          return res.status(404).json({
+            message: 'hospital Not Found'
+          })
+        };
+        if(hospital.isVerified === true ){
+          return res.status(400).json({
+            message: 'hospital has already been verified, please proceed to login'
+          })
+        }
+        const token = await jwt.sign({ hospitalId: hospital._id }, process.env.key, { expiresIn: "10mins" });
+        const link = `lifelink-xi.vercel.app/verifymail/${token}`
+        // `${req.protocol}://${req.get('host')}/api/v1/verify-user/${token}`
+    
+        const hospitalName = hospital.fullName.split( ' ')[0];
+    
+        const mailDetails = {
+          email: hospital.email,
+          subject: 'Verification Link',
+          html: welcomeMail(hospitalName, link)
+        };
+        await sendMail(mailDetails);
+        res.status(200).json({
+          message: 'New verification link sent, please check your email'
+        });
+    
+      }catch(error){
+        console.log(error.message)
+        res.status(500).json({
+          message: 'Internal Server Error'
+        })
+      }
+    } 
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
