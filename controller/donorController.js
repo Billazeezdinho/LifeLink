@@ -351,6 +351,13 @@ exports.scheduleDonation = async (req, res)=> {
           message: 'You cannot select today or a past date. Please choose a future date.'
         });
       }
+
+      const donor =   req.user;
+      if (!donor) {
+        return res.status(404).json({
+          message: "Donor not found."
+        });
+      }
       if (!donor.isVerified) {
         return res.status(403).json({
           message: 'You must verify your email before scheduling a donation.'
@@ -629,6 +636,17 @@ exports.bookAppointment = async (req, res) => {
           message: "hospitalId, date, and time are required." 
         });
       }
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+  
+      if (selectedDate <= today) {
+        return res.status(400).json({
+          message: 'You cannot select today or a past date. Please choose a future date.'
+        });
+      }
+
       const hospital = await hospitalModel.findById(hospitalId);
       if (!hospital) {
         return res.status(404).json({
