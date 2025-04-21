@@ -17,7 +17,8 @@ const path = require('path');
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
-const moment = require('moment')
+const moment = require('moment');
+const bloodRequestModel = require("../model/bloodRequestModel");
 
 
 exports.register =async (req, res) => {
@@ -721,5 +722,42 @@ LifeLink Team`
     res.status(200).json({ message: `Appointment ${status} successfully.` });
   } catch (error) {
     res.status(500).json({ message: "Server error while responding to appointment." + error.message });
+  }
+};
+
+exports.getAllHospitalBloodRequests = async (req, res) => {
+  try {
+   
+    const donor = await donorModel.findById(req.user._id).select('fullName email bloodGroup address');
+
+    if (!donor) {
+      return res.status(404).json({ message: "Donor not found" });
+    }
+
+    const bloodRequests = await bloodRequestModel.find({ })
+      .populate({
+        path: 'hospital',
+        select: 'fullName address phoneNumber city'
+      })
+      .sort({ createdAt: -1 }); 
+
+    if (!bloodRequests.length) {
+      return res.status(404).json({ message: "No active blood requests found" });
+    }
+
+    res.status(200).json({
+      message: "Active blood requests fetched successfully",
+      donor: {
+        fullName: donor.fullName,
+        email: donor.email,
+        bloodGroup: donor.bloodGroup,
+        address: donor.address
+      },
+      bloodRequests
+    });
+
+  } catch (error) {
+    console.error("Error fetching blood requests:" + error.message);
+    res.status(500).json({ message: `Internal Server Error: ${error.message}` });
   }
 };
