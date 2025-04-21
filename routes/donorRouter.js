@@ -3,6 +3,7 @@ const { register, login, resetNewPassword, changePassword, forgotPassword, sched
 const { registerValidate, loginValidator } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
+const { getAllHospitalBloodRequests } = require('../controller/hospitalController');
 
 /**
  * @swagger
@@ -865,5 +866,76 @@ router.get("/hospitals", viewHospitals);
  *         description: Internal server error
  */
 router.post("/bookAppointment", auth, bookAppointment);
+
+/**
+ * @swagger
+ * /blood-requests:
+ *   get:
+ *     summary: Get All Hospital Blood Requests
+ *     description: Retrieve a list of all blood requests made by hospitals. Requires authentication via Bearer token.
+ *     tags:
+ *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved blood requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 60f7b2f9a1e4e23f8c8b4567
+ *                       hospitalName:
+ *                         type: string
+ *                         example: City Hospital
+ *                       bloodType:
+ *                         type: string
+ *                         example: O+
+ *                       quantity:
+ *                         type: integer
+ *                         example: 5
+ *                       status:
+ *                         type: string
+ *                         example: pending
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized access. Token missing or invalid.
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching blood requests.
+ */
+
+router.get('/blood-requests', auth, getAllHospitalBloodRequests);
 
 module.exports = router;
