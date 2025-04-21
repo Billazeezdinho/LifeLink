@@ -228,6 +228,104 @@ router.post("/schedule", auth, scheduleDonation);
 
 /**
  * @swagger
+ * /hospitalDonationIn/{status}:
+ *   get:
+ *     summary: Get all donor's donations filtered by status with hospital details
+ *     tags: [Donor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pending, confirmed, rescheduled, cancelled]
+ *         description: Status of the donation to filter
+ *     responses:
+ *       200:
+ *         description: Donations fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: pending donations fetched successfully
+ *                 donations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 66147c272bb29c76e9a83b56
+ *                       donor:
+ *                         type: string
+ *                         example: 661479fe2bb29c76e9a83b45
+ *                       hospital:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 66147b8a2bb29c76e9a83b22
+ *                           name:
+ *                             type: string
+ *                             example: LifeLink General Hospital
+ *                           address:
+ *                             type: string
+ *                             example: 123 Blood Drive Avenue, Lagos
+ *                           phoneNumber:
+ *                             type: string
+ *                             example: +2348012345678
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         example: 2025-04-21
+ *                       time:
+ *                         type: string
+ *                         example: 14:00
+ *                       status:
+ *                         type: string
+ *                         example: pending
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-04-17T10:00:00.000Z
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-04-17T10:30:00.000Z
+ *                 token:
+ *                   type: string
+ *                   description: Fresh JWT token after successful request
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       404:
+ *         description: No donations found for the given status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No pending donations found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: object
+ *                   example: 'Internal Server Error: something went wrong'
+ */
+router.get("/hospitalDonationIn/:status", auth, getHospitalDonationsByStatus);
+
+/**
+ * @swagger
  * /donations/{status}:
  *   get:
  *     summary: Get all donor's donations filtered by status with hospital details
@@ -322,7 +420,7 @@ router.post("/schedule", auth, scheduleDonation);
  *                   type: object
  *                   example: 'Internal Server Error: something went wrong'
  */
-router.get("/donationIn/:status", auth, getHospitalDonationsByStatus);
+router.get("/donations/:status", auth, getDonationsByStatus);
 
 /**
  * @swagger

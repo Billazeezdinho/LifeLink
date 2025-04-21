@@ -259,7 +259,8 @@ exports.getOneDonorById = async (req, res)=>{
       })
       
     }
-  }
+  };
+
 exports.getDashboard = async (req, res) => {
     try {
       const token =generatedToken(req.user._id);
@@ -280,7 +281,7 @@ exports.getDashboard = async (req, res) => {
         message: 'Internal Server Error' + error.message 
       })
     }
-}
+};
 
 exports.getDonorAppointments = async (req, res) => {
   try {
@@ -380,48 +381,48 @@ exports.scheduleDonation = async (req, res)=> {
         message: 'Internal Server Error' + error.message
       })
     }
-  }
+};
   
-// exports.getDonationsByStatus = async (req, res) => {
-//   try {
-//     const { status } = req.params;
+exports.getDonationsByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
 
-//     const donor = await donorModel.findById(req.user._id);
-//     if (!donor) {
-//       return res.status(404).json({
-//         message: "Donor not found"
-//       });
-//     }
+    const donor = await donorModel.findById(req.user._id);
+    if (!donor) {
+      return res.status(404).json({
+        message: "Donor not found"
+      });
+    }
 
-//     const donations = await appointmentModel.find({ 
-//       donor: donor._id, 
-//       status 
-//     }).populate({
-//       path: 'hospital',
-//       select: 'fullName address phoneNumber phone profilePicture city location' 
-//     });
+    const donations = await appointmentModel.find({ 
+      donor: donor._id, 
+      status 
+    }).populate({
+      path: 'hospital',
+      select: 'fullName address phoneNumber phone profilePicture city location' 
+    });
 
-//     if (donations.length === 0) {
-//       return res.status(404).json({
-//         message: `No ${status} donations found`
-//       });
-//     }
+    if (donations.length === 0) {
+      return res.status(404).json({
+        message: `No ${status} donations found`
+      });
+    }
 
-//     const token = generatedToken(donor._id);
+    const token = generatedToken(donor._id);
 
-//     res.status(200).json({
-//       message: `${status} donations fetched successfully`,
-//       donations,
-//       token
-//     });
+    res.status(200).json({
+      message: `${status} donations fetched successfully`,
+      donations,
+      token
+    });
 
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Internal Server Error: " + error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Internal Server Error: " + error.message
+    });
+  }
+};
 
 exports.getHospitalDonationsByStatus = async (req, res) => {
   try {
@@ -501,7 +502,8 @@ exports.getDonorNotifications = async (req, res) => {
         message: 'Error fetching notifications: ' + error.message,
       });
     }
-  };
+};
+
 exports.logOut = async (req, res)=>{
     try {
       const token = req.headers.authorization?.split(' ')[1];
@@ -517,7 +519,8 @@ exports.logOut = async (req, res)=>{
         message:'Internal Server Error' + error.message
       })
     }
-  }
+  };
+
 exports.updateProfile= async (req, res)=>{
     try {
       const updateFields = req.body;
@@ -547,7 +550,8 @@ exports.updateProfile= async (req, res)=>{
       })
       
     }
-}
+};
+
 exports.UpdateDonorDetails = async (req, res) =>{
   try {
     const updateFields = req.body;
@@ -573,7 +577,7 @@ exports.UpdateDonorDetails = async (req, res) =>{
     })
     
   }
-}
+};
 
 exports.forgotPassword = async (req, res)=>{
       try{
@@ -599,7 +603,8 @@ exports.forgotPassword = async (req, res)=>{
               message: error.message
           })
       }
-  }
+  };
+
 exports.resetNewPassword = async (req, res) =>{
       try{
         const { token } = req.params;
@@ -643,7 +648,7 @@ exports.resetNewPassword = async (req, res) =>{
               message: error.message
           })
       }
-  }
+  };
  
 exports.changePassword = async (req, res) =>{
       try{
@@ -677,8 +682,9 @@ exports.changePassword = async (req, res) =>{
               message: "internal server error" + error.message
           })
       }
-  }
-  exports.viewHospitals = async (req, res) => {
+  };
+
+exports.viewHospitals = async (req, res) => {
     try {
       // Fetch hospitals list
       const hospitals = await hospitalModel.find();
@@ -695,6 +701,7 @@ exports.changePassword = async (req, res) =>{
       res.status(500).json({ message: 'Server error' });
     }
   };
+
 exports.bookAppointment = async (req, res) => {
     try {
       const { hospitalId, date, time } = req.body;
