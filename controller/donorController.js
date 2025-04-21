@@ -343,7 +343,7 @@ exports.scheduleDonation = async (req, res)=> {
     try {
       const {date, hospitalId, time} = req.body;
       
-      if (!date || !hospitalId, !time ){
+      if (!date || !hospitalId || !time ){
         return res.status(400).json({
           message: 'Date, time and hospital are required'
         })
@@ -357,15 +357,14 @@ exports.scheduleDonation = async (req, res)=> {
         return res.status(400).json({
           message: 'You cannot select today or a past date. Please choose a future date.'
         });
-      }
-
+      };
       const donor =   req.user;
       if (!donor) {
         return res.status(404).json({
           message: "Donor not found."
         });
-      }
-      if (donor.isVerified) {
+      };
+      if (!donor.isVerified) {
         return res.status(403).json({
           message: 'You must verify your email before scheduling a donation.'
         });
