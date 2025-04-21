@@ -12,6 +12,17 @@ const HospitalSchema = new mongoose.Schema({
   city: { type: String },
   state: { type: String },
   profilePicture: { type: String },
+  notifications:[{
+    message:{
+      type: String
+     },
+    from:{
+      type: String
+    },
+    date:{
+      type: Date, default: Date.now
+    }
+  }],
   kycCompleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 

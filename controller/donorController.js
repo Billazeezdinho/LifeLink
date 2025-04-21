@@ -807,6 +807,16 @@ exports.bookAppointment = async (req, res) => {
           Please log into the Lifelink app to manage the appointment.
           `
           });
+
+          await hospitalModel.findByIdAndUpdate(hospitalId, {
+            $push: {
+              notifications: {
+                message: `New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
+                from: 'LifeLink',
+                date: new Date()
+              }
+            }
+          });
     
   
       res.status(200).json({
