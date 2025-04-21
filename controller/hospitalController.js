@@ -674,7 +674,7 @@ exports.getHospitalAppointments = async (req, res) => {
   }
 };
 
-// Accept or Reject an appointment
+
 exports.respondToAppointment = async (req, res) => {
   try {
     const { appointmentId } = req.params;
@@ -737,10 +737,10 @@ exports.getAllHospitalBloodRequests = async (req, res) => {
     const bloodRequests = await bloodRequestModel.find({ })
       .populate({
         path: 'hospital',
-        select: 'fullName address phoneNumber city'
+        select: 'fullName address phoneNumber city profilePicture'
       })
       .sort({ createdAt: -1 }); 
-
+      
     if (!bloodRequests.length) {
       return res.status(404).json({ message: "No active blood requests found" });
     }
