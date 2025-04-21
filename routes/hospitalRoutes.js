@@ -617,7 +617,7 @@ router.post('/hospital/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC)
 
 /**
  * @swagger
- * /blood-request/{id}:
+ * /blood-request/{hospitalId}:
  *   get:
  *     summary: Get a single blood request by its ID
  *     description: Allows a verified donor to fetch the details of a specific blood request by its ID.
@@ -689,6 +689,6 @@ router.post('/hospital/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC)
  */
 
 // Route setup
-router.get('/blood-request/:id', auth,  getOneBloodRequestById);
+router.get('/blood-request/:hospitalId', auth,  getOneBloodRequestById);
 
 module.exports = router;
