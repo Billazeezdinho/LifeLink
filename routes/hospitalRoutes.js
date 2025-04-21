@@ -208,77 +208,7 @@ router.post('/hospital/forgotPassword', forgotPassword);
 
 router.post('/hospital/resetPassword/:token', resetPassword);
 
-/**
- * @swagger
- * /hospital/{hospitalId}:
- *   get:
- *     summary: Get complete information about a hospital
- *     tags: [Hospital]
- *     security:
- *       - bearerAuth: []    # This indicates that Authorization token is needed
- *     description: Retrieve full details of a specific hospital by ID.
- *     parameters:
- *       - in: path
- *         name: hospitalId
- *         required: true
- *         description: The ID of the hospital to retrieve.
- *         schema:
- *           type: string
- *           example: 64321ab7e2f476001d98dccc
- *     responses:
- *       200:
- *         description: Hospital fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Hospital fetched successfully
- *                 hospital:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: 64321ab7e2f476001d98dccc
- *                     fullName:
- *                       type: string
- *                       example: St. Mary's Hospital
- *                     email:
- *                       type: string
- *                       example: hospital@example.com
- *                     location:
- *                       type: string
- *                       example: New York
- *                     phone:
- *                       type: string
- *                       example: +123456789
- *                     address:
- *                       type: string
- *                       example: 123 Main Street
- *                     city:
- *                       type: string
- *                       example: New York City
- *                     state:
- *                       type: string
- *                       example: NY
- *                     profilePicture:
- *                       type: string
- *                       example: https://cloudinary.com/sample.jpg
- *                     role:
- *                       type: string
- *                       example: hospital
- *                     kycCompleted:
- *                       type: boolean
- *                       example: true
- *       404:
- *         description: Hospital not found
- *       500:
- *         description: Server error
- */
 
-router.get('/hospital/:hospitalId', auth, getOneHospital);
 
 /**
  * @swagger
@@ -431,6 +361,82 @@ router.post('/hospital/request-blood', auth, roleAuth(['hospital']), submitBlood
  *                   example: Internal Server Error
  */
 router.get('/hospital/history', auth, roleAuth(['hospital']), getBloodRequestHistory);
+
+
+/**
+ * @swagger
+ * /hospital/{hospitalId}:
+ *   get:
+ *     summary: Get complete information about a hospital
+ *     tags: [Hospital]
+ *     security:
+ *       - bearerAuth: []    # This indicates that Authorization token is needed
+ *     description: Retrieve full details of a specific hospital by ID.
+ *     parameters:
+ *       - in: path
+ *         name: hospitalId
+ *         required: true
+ *         description: The ID of the hospital to retrieve.
+ *         schema:
+ *           type: string
+ *           example: 64321ab7e2f476001d98dccc
+ *     responses:
+ *       200:
+ *         description: Hospital fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Hospital fetched successfully
+ *                 hospital:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 64321ab7e2f476001d98dccc
+ *                     fullName:
+ *                       type: string
+ *                       example: St. Mary's Hospital
+ *                     email:
+ *                       type: string
+ *                       example: hospital@example.com
+ *                     location:
+ *                       type: string
+ *                       example: New York
+ *                     phone:
+ *                       type: string
+ *                       example: +123456789
+ *                     address:
+ *                       type: string
+ *                       example: 123 Main Street
+ *                     city:
+ *                       type: string
+ *                       example: New York City
+ *                     state:
+ *                       type: string
+ *                       example: NY
+ *                     profilePicture:
+ *                       type: string
+ *                       example: https://cloudinary.com/sample.jpg
+ *                     role:
+ *                       type: string
+ *                       example: hospital
+ *                     kycCompleted:
+ *                       type: boolean
+ *                       example: true
+ *       404:
+ *         description: Hospital not found
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/hospital/:hospitalId', auth, getOneHospital);
+
+
+
 
 /**
  * @swagger

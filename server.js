@@ -6,6 +6,7 @@ const donorRouter = require('./routes/donorRouter')
 const transactionRouter = require('./routes/transactionRouter')
 const hospitalRoutes = require('./routes/hospitalRoutes')
 const adminRoutes = require('./routes/adminRoutes');
+const donationRecordRoutes = require('./routes/donationRecordRoutes');
 const cors = require('cors');
 const morgan = require('morgan');
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -74,6 +75,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.get('/', (req, res)=>{
     res.send('Welcome to LifeLink')
 })
+app.use('/api/v1/donations', donationRecordRoutes);
 app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
 app.use('/api/v1', hospitalRoutes);
