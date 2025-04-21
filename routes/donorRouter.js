@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor, getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments, verifyDonors, resendVerificationEmail } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor, getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments, verifyDonors, resendVerificationEmail, getHospitalDonationsByStatus } = require('../controller/donorController');
 const { registerValidate, loginValidator } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
@@ -322,7 +322,7 @@ router.post("/schedule", auth, scheduleDonation);
  *                   type: object
  *                   example: 'Internal Server Error: something went wrong'
  */
-router.get("/donations/:status", auth, getDonationsByStatus);
+router.get("/donationIn/:status", auth, getHospitalDonationsByStatus);
 
 /**
  * @swagger

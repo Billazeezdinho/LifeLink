@@ -382,46 +382,107 @@ exports.scheduleDonation = async (req, res)=> {
     }
   }
   
-exports.getDonationsByStatus = async (req, res) => {
+// exports.getDonationsByStatus = async (req, res) => {
+//   try {
+//     const { status } = req.params;
+
+//     const donor = await donorModel.findById(req.user._id);
+//     if (!donor) {
+//       return res.status(404).json({
+//         message: "Donor not found"
+//       });
+//     }
+
+//     const donations = await appointmentModel.find({ 
+//       donor: donor._id, 
+//       status 
+//     }).populate({
+//       path: 'hospital',
+//       select: 'fullName address phoneNumber phone profilePicture city location' 
+//     });
+
+//     if (donations.length === 0) {
+//       return res.status(404).json({
+//         message: `No ${status} donations found`
+//       });
+//     }
+
+//     const token = generatedToken(donor._id);
+
+//     res.status(200).json({
+//       message: `${status} donations fetched successfully`,
+//       donations,
+//       token
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       message: "Internal Server Error: " + error.message
+//     });
+//   }
+// };
+
+exports.getHospitalDonationsByStatus = async (req, res) => {
   try {
     const { status } = req.params;
+    const token = req.headers.authorization?.split(' ')[1];
 
-    const donor = await donorModel.findById(req.user._id);
-    if (!donor) {
-      return res.status(404).json({
-        message: "Donor not found"
+    if (!token) {
+      return res.status(401).json({ message: "Authorization token missing" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.key); // Make sure you have JWT_SECRET in env
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    const hospitalId = decoded.id; // assuming the token payload contains hospital id as 'id'
+
+    const validStatuses = ['pending', 'completed', 'cancelled']; // Update based on your real statuses
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: `Invalid status '${status}'. Valid statuses are: ${validStatuses.join(', ')}`
       });
     }
 
-    const donations = await appointmentModel.find({ 
-      donor: donor._id, 
-      status 
+    const hospital = await hospitalModel.findById(hospitalId).select('fullName address phoneNumber email');
+
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+
+    const donations = await appointmentModel.find({
+      hospital: hospitalId,
+      status
     }).populate({
-      path: 'hospital',
-      select: 'fullName address phoneNumber phone profilePicture city location' 
+      path: 'donor',
+      select: 'fullName email phoneNumber address bloodGroup'
     });
 
-    if (donations.length === 0) {
-      return res.status(404).json({
-        message: `No ${status} donations found`
-      });
+    if (!donations.length) {
+      return res.status(404).json({ message: `No donations with status '${status}' found for this hospital` });
     }
 
-    const token = generatedToken(donor._id);
-
     res.status(200).json({
-      message: `${status} donations fetched successfully`,
-      donations,
-      token
+      message: `${status} donations for hospital fetched successfully`,
+      hospital: {
+        fullName: hospital.fullName,
+        address: hospital.address,
+        phoneNumber: hospital.phoneNumber
+      },
+      donations
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Internal Server Error: " + error.message
-    });
+    console.error("Error fetching hospital donations by status:", error);
+    res.status(500).json({ message: `Internal Server Error: ${error.message}` });
   }
 };
+
 exports.getDonorNotifications = async (req, res) => {
     try {
       const donor = await donorModel.findById(req.user.id).populate('notifications.from', 'fullName email');
