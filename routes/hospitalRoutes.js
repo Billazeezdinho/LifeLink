@@ -15,8 +15,6 @@ const {
   getHospitalAppointments,
   respondToAppointment,
   getOneHospital,
-  resendVerificationEmail,
-  verifyHoospital,
   getAppointmentHistory,
   getOneBloodRequestById,
 } = require('../controller/hospitalController');
@@ -63,58 +61,6 @@ const upload = require('../config/multerConfig');
  */
 router.post('/hospital/register', register);
 
-/**
- * @swagger
- * /verify-hospital/{token}:
- *   get:
- *     summary: Verify Hospital via email token
- *     tags: [Hospital]
- *     parameters:
- *       - name: token
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         example: "someVerificationToken"
- *     responses:
- *       200:
- *         description: Hospital verified successfully
- *       400:
- *         description: Invalid or expired token
- */
-router.get('/verify-hospital/:token', verifyHoospital);
-
-/**
- * @swagger
- * /hospital/re-verify:
- *   post:
- *     summary: Resend verification email
- *     tags: [Hospital]
- *     description: Resend a verification email to the Hospital.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 example: LifeLink@mail.com
- *     responses:
- *       200:
- *         description: New verification link sent successfully.
- *       400:
- *         description: Hospital is already verified or email is missing.
- *       404:
- *         description: Hospital not found.
- *       500:
- *         description: Internal server error.
- */
-
-router.post('/hospital/re-verify', resendVerificationEmail);
 
 /**
  * @swagger
