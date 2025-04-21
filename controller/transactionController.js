@@ -5,6 +5,8 @@ const otp = otpGenerator.generate(12, {specialChars: false})
 const ref =  `LifeLink-ch6-${otp}`;
 const secret_key = process.env.korapay_secret_key
 const formattedDate = new Date().toLocaleString()
+console.log('Process: ',process.env.korapay_secret_key)
+console.log('Secret',secret_key)
 
 exports.initializePayment = async (req, res) =>{
     try {

@@ -341,11 +341,11 @@ exports.cancelAppointment = async (req, res) => {
 
 exports.scheduleDonation = async (req, res)=> {
     try {
-      const {date, hospitalId} = req.body;
+      const {date, hospitalId, time} = req.body;
       
-      if (!date || !hospitalId ){
+      if (!date || !hospitalId, !time ){
         return res.status(400).json({
-          message: 'Date and hospital are required'
+          message: 'Date, time and hospital are required'
         })
       }
       const selectedDate = new Date(date);
@@ -365,11 +365,11 @@ exports.scheduleDonation = async (req, res)=> {
           message: "Donor not found."
         });
       }
-      if (!donor.isVerified) {
+      if (donor.isVerified) {
         return res.status(403).json({
           message: 'You must verify your email before scheduling a donation.'
         });
-      }
+      };
       const updated = await donorModel.findByIdAndUpdate(req.user._id, { status: 'pending'}, {new: true});
       const token = generatedToken(updated._id);
       res.status(201).json({
