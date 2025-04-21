@@ -37,7 +37,8 @@ const donorSchema = new mongoose.Schema(
     gender: {
       type: String,
       trim: true,
-      enum: ['male', 'female', 'other']
+      enum: ['male', 'female', 'other'],
+      lowercase: true
     },
     phoneNumber: {
       type: String,
@@ -55,6 +56,7 @@ const donorSchema = new mongoose.Schema(
       enum:['pending', 'accepted', 'declined'],
       default: 'pending'
     },
+    
     donations:[{
       hospitalId: mongoose.Schema.Types.ObjectId,
       date: Date,

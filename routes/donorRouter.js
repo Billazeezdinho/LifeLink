@@ -203,25 +203,56 @@ router.get("/dashboard", auth ,getDashboard);
  *   post:
  *     summary: Schedule a donation
  *     tags: [Donor]
- *     description: Schedule a donation appointment with a date and hospital ID.
+ *     description: Schedule a donation appointment by selecting a date, time, and hospital ID. Donors must be verified before scheduling.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - date
+ *               - hospitalId
+ *               - time
  *             properties:
  *               date:
  *                 type: string
+ *                 description: Date for the donation (format YYYY-MM-DD)
  *                 example: 2025-04-20
  *               hospitalId:
  *                 type: string
+ *                 description: The ID of the hospital where the donation will happen
  *                 example: 64321ab7e2f476001d98dccc
+ *               time:
+ *                 type: string
+ *                 description: Time for the donation (format HH:mm or hh:mm AM/PM)
+ *                 example: "02:30 PM"
  *     responses:
  *       201:
  *         description: Donation scheduled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Donation appointment scheduled
+ *                 scheduledDate:
+ *                   type: string
+ *                   example: 2025-04-20
+ *                 scheduledTime:
+ *                   type: string
+ *                   example: 02:30 PM
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
- *         description: Missing required fields
+ *         description: Missing required fields or invalid input
+ *       403:
+ *         description: Donor must verify email before scheduling
+ *       404:
+ *         description: Donor not found
  *       500:
  *         description: Internal server error
  */

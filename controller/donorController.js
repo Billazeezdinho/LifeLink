@@ -358,6 +358,7 @@ exports.scheduleDonation = async (req, res)=> {
           message: 'You cannot select today or a past date. Please choose a future date.'
         });
       };
+     
       const donor =   req.user;
       if (!donor) {
         return res.status(404).json({
@@ -369,10 +370,13 @@ exports.scheduleDonation = async (req, res)=> {
           message: 'You must verify your email before scheduling a donation.'
         });
       };
+
       const updated = await donorModel.findByIdAndUpdate(req.user._id, { status: 'pending'}, {new: true});
       const token = generatedToken(updated._id);
       res.status(201).json({
         message: "donation appointment scheduled",
+        scheduledDate: moment(selectedDate).format('YYYY-MM-DD'),
+        scheduledTime: time,
         token
       })
     } catch (error) {
