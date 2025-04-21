@@ -78,6 +78,52 @@ exports.register =async (req, res) => {
 };
 
 
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password required' });
+    }
+
+    const hospital = await hospitalModel.findOne({ email: email.toLowerCase() });
+    if (!hospital) {
+      return res.status(404).json({ message: 'invalid credentials' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, hospital.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    //  Ensure role is saved correctly
+    if (hospital.role.toLowerCase() !== 'hospital') {
+      await hospitalModel.updateOne(
+        { email: hospital.email },
+        { $set: { role: 'hospital' } }
+      );
+      hospital.role = 'hospital'; // Also update the local object
+    }
+
+      const token = jwt.sign(
+      { id: hospital._id, role: hospital.role }, // Now guaranteed to be lowercase
+      process.env.key,
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({
+      message: 'Logged In Successfully',
+      data: hospital,
+      token
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal Server Error ' + error.message
+    });
+  }
+};
+
 exports.verifyHoospital = async (req, res) => {
       try {
         const { token } = req.params;
@@ -197,52 +243,6 @@ exports.resendVerificationEmail = async (req, res) =>{
         })
       }
     } 
-
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
-    }
-
-    const hospital = await hospitalModel.findOne({ email: email.toLowerCase() });
-    if (!hospital) {
-      return res.status(404).json({ message: 'invalid credentials' });
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(password, hospital.password);
-    if (!isPasswordCorrect) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    //  Ensure role is saved correctly
-    if (hospital.role.toLowerCase() !== 'hospital') {
-      await hospitalModel.updateOne(
-        { email: hospital.email },
-        { $set: { role: 'hospital' } }
-      );
-      hospital.role = 'hospital'; // Also update the local object
-    }
-
-      const token = jwt.sign(
-      { id: hospital._id, role: hospital.role }, // Now guaranteed to be lowercase
-      process.env.key,
-      { expiresIn: '1d' }
-    );
-
-    res.status(200).json({
-      message: 'Logged In Successfully',
-      data: hospital,
-      token
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: 'Internal Server Error ' + error.message
-    });
-  }
-};
 
 
   exports.searchForDonors = async (req, res) => {
@@ -576,27 +576,20 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-
 exports.submitKYC = async (req, res) => {
   try {
-    const { hospitalId } = req.user; // Hospital ID from the user object
+    const { hospitalId } = req.user;
     const { licenseNumber } = req.body;
     const files = req.files;
 
-    // Check if there is an existing KYC document for the hospital
+    // Check if there's an existing KYC
     const existingKYC = await KYC.findOne({ hospital: hospitalId });
 
-    // If a previous KYC exists, check its status
-    if (existingKYC) {
-      if (existingKYC.status === 'pending') {
-        return res.status(400).json({
-          message: 'A KYC is already pending for this hospital. Resubmission is not allowed.',
-        });
-      }
-
-      if (existingKYC.status === 'declined') {
-        await KYC.findByIdAndDelete(existingKYC._id); // Delete the old declined KYC document
-      }
+    // If pending, deny resubmission
+    if (existingKYC?.status === 'pending') {
+      return res.status(400).json({
+        message: 'A KYC is already pending for this hospital. Resubmission is not allowed.',
+      });
     }
 
     // Upload files to Cloudinary
@@ -604,17 +597,21 @@ exports.submitKYC = async (req, res) => {
     const certificateUpload = await cloudinary.uploader.upload(files.accreditedCertificate[0].path);
     const utilityBillUpload = await cloudinary.uploader.upload(files.utilityBill[0].path);
 
-    // Save the new KYC data
-    const kycData = await KYC.create({
-      hospital: hospitalId,
-      facilityImage: facilityImageUpload.secure_url,
-      accreditedCertificate: certificateUpload.secure_url,
-      licenseNumber,
-      utilityBill: utilityBillUpload.secure_url,
-      status: 'pending', // Set status to 'pending' for new submissions
-    });
+    // Create or Replace KYC document (this avoids the unique constraint error)
+    const kycData = await KYC.findOneAndUpdate(
+      { hospital: hospitalId },
+      {
+        hospital: hospitalId,
+        facilityImage: facilityImageUpload.secure_url,
+        accreditedCertificate: certificateUpload.secure_url,
+        licenseNumber,
+        utilityBill: utilityBillUpload.secure_url,
+        status: 'pending',
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
 
-    // Mark hospital as KYC complete (optional, depends on your logic)
+    // Mark hospital as KYC complete
     await Hospital.findByIdAndUpdate(hospitalId, { kycCompleted: true });
 
     res.status(201).json({ message: 'KYC submitted successfully', kycData });
@@ -622,6 +619,7 @@ exports.submitKYC = async (req, res) => {
     res.status(500).json({ message: 'KYC submission failed', error: error.message });
   }
 };
+
 
 exports.getHospitalAppointments = async (req, res) => {
   try {
