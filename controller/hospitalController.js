@@ -8,8 +8,6 @@ const jwt = require("jsonwebtoken");
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
 const sendMail = require("../utils/email");
-const welcomeMail = require("../utils/hospitalWelcome");
-const email  = require("../utils/email");
 require("dotenv").config(); 
 const BloodRequest = require('../model/bloodRequestModel');
 const multer = require('multer');
@@ -788,7 +786,7 @@ exports.getOneBloodRequestById = async (req, res) => {
     const bloodRequest = await bloodRequestModel.findById(bloodRequestId)
       .populate({
         path: 'hospital',
-        select: 'fullName address phoneNumber city profilePics' 
+        select: 'fullName email location phone address city profilePics' 
       });
 
     if (!bloodRequest) {
