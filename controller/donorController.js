@@ -809,4 +809,3 @@ exports.deleteDonor = async (req, res) => {
       })
     }
   }
-

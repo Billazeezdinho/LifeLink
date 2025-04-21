@@ -297,7 +297,35 @@ exports.login = async (req, res) => {
       });
   
       await request.save();
+      
+    // 🔥 New Part: Send emails to all donors
+    const donors = await donorModel.find({}); // you can add filter like { isVerified: true } if you want
+    const donorEmails = donors.map(donor => donor.email);
 
+    if (donorEmails.length > 0) {
+      const emailPromises = donorEmails.map(email => 
+        sendEmail({
+          to: email,
+          subject: 'Urgent Blood Donation Needed',
+          html: `
+            <h2>Urgent Blood Request</h2>
+            <p>Dear Donor,</p>
+            <p>We have an urgent request for blood donation:</p>
+            <ul>
+              <li><strong>Blood Group:</strong> ${bloodGroup}</li>
+              <li><strong>Number of Pints Needed:</strong> ${numberOfPints}</li>
+              <li><strong>Preferred Date:</strong> ${formattedPreferredDate.format('YYYY-MM-DD')}</li>
+              <li><strong>Urgency Level:</strong> ${urgencyLevel}</li>
+            </ul>
+            <p>Please log in to your account to see more details or schedule a donation. Your contribution saves lives!</p>
+            <p>Thank you,</p>
+            <p>LifeLink Team</p>
+          `
+        })
+      );
+
+      await Promise.all(emailPromises); // wait for all emails to be sent
+    }
       const responseData = {
         _id: request._id,
         hospital: request.hospital,
