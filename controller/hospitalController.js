@@ -815,3 +815,35 @@ exports.getOneBloodRequestById = async (req, res) => {
   }
 };
 
+
+exports.deleteBloodRequest = async (req, res) => {
+  try {
+    const hospital = req.user; 
+    const { id } = req.params;
+
+    if (!hospital || hospital.role !== 'hospital') {
+      return res.status(403).json({ message: 'Only hospitals can delete blood requests.' });
+    }
+
+    
+    const bloodRequest = await bloodRequestModel.findById(id);
+
+    if (!bloodRequest) {
+      return res.status(404).json({ message: 'Blood request not found.' });
+    }
+
+    
+    if (bloodRequest.hospital.toString() !== hospital._id.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this blood request.' });
+    }
+
+    
+    await bloodRequestModel.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Blood request deleted successfully.' });
+
+  } catch (error) {
+    console.error('Error deleting blood request:', error.message);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};

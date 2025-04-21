@@ -3,7 +3,7 @@ const { register, login, resetNewPassword, changePassword, forgotPassword, sched
 const { registerValidate, loginValidator } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
-const { getAllHospitalBloodRequests } = require('../controller/hospitalController');
+const { getAllHospitalBloodRequests, deleteBloodRequest } = require('../controller/hospitalController');
 
 /**
  * @swagger
@@ -968,5 +968,78 @@ router.post("/bookAppointment", auth, bookAppointment);
  */
 
 router.get('/blood-requests', auth, getAllHospitalBloodRequests);
+
+/**
+ * @swagger
+ * /delete-blood-request/{id}:
+ *   delete:
+ *     summary: Delete a blood request by ID (only accessible by the hospital that created the request)
+ *     tags: [Blood Requests]
+ *     description: This route allows hospitals to delete a blood request they have created.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the blood request to be deleted.
+ *         schema:
+ *           type: string
+ *           example: 60d8a000e8b1b76b6f3e4fdb
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Blood request deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Blood request deleted successfully"
+ *       '400':
+ *         description: Bad request, invalid ID or missing parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid blood request ID"
+ *       '403':
+ *         description: Forbidden, unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Only the hospital that created the blood request can delete it"
+ *       '404':
+ *         description: Not found, blood request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Blood request not found"
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ */
+
+router.delete('/delete-blood-request/:id', auth, deleteBloodRequest );
+
 
 module.exports = router;
