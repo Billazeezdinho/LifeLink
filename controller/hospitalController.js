@@ -181,7 +181,8 @@ exports.submitBloodRequest = async (req, res) => {
       {},
       { $push: {
         notifications: {
-          message: `New blood request (ID: ${request._id}) from ${hospitalName} for ${bloodGroup} blood group.`,
+          requestId: request._id,
+          message: `New blood request from ${hospitalName} for ${bloodGroup} blood group.`,
           from: `fullName: ${hospitalName}`,
           date: new Date()
         } 
