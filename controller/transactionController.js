@@ -102,6 +102,12 @@ exports.verifyPayment = async (req, res) => {
 
         if (data?.status === 'success') {
             await transactionModel.findOneAndUpdate({ reference }, { status: 'success' }, { new: true });
+                            
+            const { hospital } = transaction;
+            await hospitalModel.findByIdAndUpdate(hospital, {
+                paymentStatus: true,
+                payment: transaction._id,
+            })
             return res.redirect(`${frontendRedirectUrl}?status=success&reference=${reference}`);
         } else {
             await transactionModel.findOneAndUpdate({ reference }, { status: 'failed' }, { new: true });

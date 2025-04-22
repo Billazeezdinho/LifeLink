@@ -23,6 +23,16 @@ const HospitalSchema = new mongoose.Schema({
       type: Date, default: Date.now
     }
   }],
+  
+  paymentStatus: {
+    type: Boolean,
+    default: false, // Default to unpaid
+  },
+  payment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transaction',
+  },
+
   kycCompleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 
