@@ -74,6 +74,9 @@ const donorSchema = new mongoose.Schema(
       from:{
         type: String
       },
+      requestId:{
+        type: String
+      },
       date:{
         type: Date, default: Date.now
       }
