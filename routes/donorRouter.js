@@ -24,11 +24,11 @@ const { getAllHospitalBloodRequests, deleteBloodRequest } = require('../controll
  *       - bearerAuth: []   # JWT Authentication
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: bloodRequestId
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the blood request to fetch
+ *         description: The bloodRequestId of the blood request to fetch
  *     responses:
  *       200:
  *         description: Blood request fetched successfully

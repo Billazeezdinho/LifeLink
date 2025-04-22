@@ -527,9 +527,16 @@ exports.resetPassword = async (req, res) => {
 
 exports.submitKYC = async (req, res) => {
   try {
-    const { hospitalId } = req.user; // Hospital ID from the user object
+    const { hospital } = req.user; 
+    if (!hospital || !hospital._id) {
+      return res.status(401).json({ message: 'Unauthorized. Hospital information not found.' });
+    }
+    const hospitalId = hospital._id;
     const { licenseNumber } = req.body;
     const files = req.files;
+    if (!licenseNumber || !files) {
+      return res.status(400).json({ message: 'License number and documents are required.' });
+    }
 
     // Check if there is an existing KYC document for the hospital
     const existingKYC = await KYC.findOne({ hospital: hospitalId });
@@ -564,9 +571,12 @@ exports.submitKYC = async (req, res) => {
 
     // Mark hospital as KYC complete (optional, depends on your logic)
     await Hospital.findByIdAndUpdate(hospitalId, { kycCompleted: true });
-
+    uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
     res.status(201).json({ message: 'KYC submitted successfully', kycData });
   } catch (error) {
+    if (uploadedFilePaths.length > 0) {
+      uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
+    }
     res.status(500).json({ message: 'KYC submission failed', error: error.message });
   }
 };
