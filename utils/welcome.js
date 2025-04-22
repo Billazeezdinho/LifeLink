@@ -46,9 +46,12 @@ const welcomeMail = (fullName, link) => {
           font-size: 16px;
           line-height: 1.7;
         }
+        .button-wrapper {
+          margin-top: 25px;
+          text-align: center;
+        }
         .cta-button {
           display: inline-block;
-          margin-top: 25px;
           padding: 14px 30px;
           background: linear-gradient(to right, #0077b6, #e63946);
           color: #fff;
@@ -56,6 +59,7 @@ const welcomeMail = (fullName, link) => {
           font-weight: 600;
           border-radius: 6px;
           transition: background 0.3s ease;
+          font-size: 16px;
         }
         .cta-button:hover {
           background: linear-gradient(to right, #005f87, #c5303f);
@@ -67,12 +71,30 @@ const welcomeMail = (fullName, link) => {
           padding: 20px;
           background-color: #f7f9fb;
         }
+        @media (max-width: 600px) {
+          .cta-button {
+            display: block;
+            width: 90%;
+            margin: 0 auto;
+            font-size: 18px;
+            padding: 16px;
+          }
+          .content h2 {
+            font-size: 20px;
+          }
+          .content p {
+            font-size: 15px;
+          }
+          .header h1 {
+            font-size: 26px;
+          }
+        }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to LifeLink</h1>
+          <h1>Welcome to LifeLink🌹</h1>
         </div>
         <div class="content">
           <h2>Hello, ${fullName} 👋</h2>
@@ -82,13 +104,15 @@ const welcomeMail = (fullName, link) => {
           <p>
             To complete your registration and start making a difference, please verify your email address by clicking the button below.
           </p>
-          <a href="${link}" class="cta-button">Verify Your Account</a>
+          <div class="button-wrapper">
+            <a href="${link}" class="cta-button" target="_blank" rel="noopener noreferrer">Verify Your Account</a>
+          </div>
           <p style="margin-top: 20px; font-size: 14px; color: #555;">
             If you did not sign up for LifeLink, please ignore this email.
           </p>
         </div>
         <div class="footer">
-          &copy; ${new Date().getFullYear()} LifeLink. All rights reserved.
+          &copy; ${new Date().getFullYear()} 🌹LifeLink. All rights reserved.
         </div>
       </div>
     </body>
