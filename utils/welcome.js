@@ -1,5 +1,5 @@
-const welcomeMail = (fullName) => {
-    return `
+const welcomeMail = (fullName, link) => {
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -77,12 +77,15 @@ const welcomeMail = (fullName) => {
         <div class="content">
           <h2>Hello, ${fullName} 👋</h2>
           <p>
-            We’re excited to welcome you to <strong>LifeLink</strong> – where compassion meets action. As a donor, you’re part of something life-changing.
+            Welcome to <strong>LifeLink</strong>! We're thrilled to have you join our life-saving community of donors.
           </p>
           <p>
-            Log in anytime to schedule donations, connect with hospitals, and help save lives.
+            To complete your registration and start making a difference, please verify your email address by clicking the button below.
           </p>
-          <a href="https://lifelink.org/login" class="cta-button">Get Started</a>
+          <a href="${link}" class="cta-button">Verify Your Account</a>
+          <p style="margin-top: 20px; font-size: 14px; color: #555;">
+            If you did not sign up for LifeLink, please ignore this email.
+          </p>
         </div>
         <div class="footer">
           &copy; ${new Date().getFullYear()} LifeLink. All rights reserved.
@@ -90,8 +93,7 @@ const welcomeMail = (fullName) => {
       </div>
     </body>
     </html>
-    `;
-  };
-  
-  module.exports = welcomeMail;
-  
+  `;
+};
+
+module.exports = welcomeMail;

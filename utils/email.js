@@ -15,7 +15,7 @@ const sendMail = async ( options ) => {
         }
     });
     const mailOption = {
-        subject: options.subject, text:options.text, from:"kristenhosh@gmail.com", to:options.email, html:options.html
+        subject: options.subject, text:options.text, from:`"LifeLink"<${process.env.userEmail}>`, to:options.email, html:options.html
     };
     await transporter.sendMail(mailOption)
 }

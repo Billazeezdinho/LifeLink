@@ -1,57 +1,73 @@
 const jwt = require("jsonwebtoken");
-const donorModel = require("../model/donorModel");
+const { donorModel } = require("../model/donorModel");
 const hospitalModel = require('../model/hospitalModel'); 
 const adminModel = require('../model/adminModel');
 
-  const blacklistedTokens = new Set();
- const auth = async (req, res, next) => {
-    try {
-      const token = req.headers.authorization?.split(" ")[1];
-      if (!token){ 
-        return res.status(401).json({ 
-        message: "No token provided" 
-      })};
-      if (blacklistedTokens.has(token)) {
-        return res.status(401).json({ 
-          message: "Token has been invalidated. Please log in again." 
-        });
-      }
-      const decoded = jwt.verify(token, process.env.key);
-      let user;
-      user = (await donorModel.findById(decoded.id)) || (await hospitalModel.findById(decoded.id)) || (await adminModel.findById(decoded.id));
-      if (!user){
-        return res.status(404).json({ 
-          message: "User not found" 
-        })};
-      req.user = user;
-      next();
-    } catch (error) {
-      console.log(error.message)
-      res.status(401).json({ 
-      message: "Authentication failed", error,message
-    });
-    }
-  };
+const blacklistedTokens = new Set();
 
-module.exports = auth;
-module.exports = blacklistedTokens;
-
-const roleAuth = (allowedRoles) => {
-  return (req, res, next) => {
-    try {
-      const userRole = req.user.role;
-      if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({ 
-          message: "Access denied: insufficient permissions" 
-        });
-      }
-      next();
-    } catch (error) {
-      res.status(500).json({ 
-        message: "Role authentication failed", error 
-      });
+const auth = async (req, res, next) => {
+  try {
+    // Extract token from Authorization header
+    const token = req.headers.authorization?.split(" ")[1];
+    
+    // Check if token exists
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
     }
-  };
+    
+    // Check if token is blacklisted
+    if (blacklistedTokens.has(token)) {
+      return res.status(401).json({ message: ` ${req.user} logged out. Please log in again.` });
+    }
+  
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.key); // Use a more descriptive variable name for the secret
+    console.log('Decode',decoded)
+    let user;
+
+    // Check which model the user belongs to (donor, hospital, or admin)
+    user = (await donorModel.findById(decoded.id)) || 
+           (await hospitalModel.findById(decoded.id)) || 
+           (await adminModel.findById(decoded.id));
+           console.log('User',user)
+    // If user is not found
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Attach the user to the request object for use in subsequent middleware
+    req.user = user;
+    next();
+  } catch (error) {
+   
+    res.status(401).json({ message: "Authentication failed: " + error.message });
+  }
 };
 
-module.exports = roleAuth; 
+// Middleware for role-based authorization
+const roleAuth = (allowedRoles) => {
+  return (req, res, next) => {
+    console.log('Here')
+    try {
+      
+      console.log(req.user.role)
+      const userRole = req.user.role;
+      
+      // Check if the user's role is allowed
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(403).json({ message: "Access denied " });
+      }
+
+      next();
+    } catch (error) {
+      
+      res.status(500).json({ message: "Role authentication failed: " + error.message });
+    }
+  };
+}
+
+module.exports = {
+  auth,
+  roleAuth,
+  blacklistedTokens,
+};

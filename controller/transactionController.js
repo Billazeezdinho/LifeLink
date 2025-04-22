@@ -2,7 +2,7 @@ const {transactionModel} = require('../model/transactionModel');
 const axios = require('axios')
 const otpGenerator = require('otp-generator');
 const otp = otpGenerator.generate(12, {specialChars: false})
-const ref =  `TCA-AF-${otp}`;
+const ref =  `LifeLink-ch6-${otp}`;
 const secret_key = process.env.korapay_secret_key
 const formattedDate = new Date().toLocaleString()
 
@@ -23,9 +23,11 @@ exports.initializePayment = async (req, res) =>{
             currency: 'NGN',
             reference: ref
         };
+        
         const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
             headers: {
-                Authorization: `Bearer ${secret_key}`
+                Authorization: `Bearer ${secret_key}`,
+                'Content-Type': 'application/json'
             }
         });
         
@@ -52,7 +54,7 @@ exports.initializePayment = async (req, res) =>{
         res.status(500).json({
             message: ' Internal server error ' + error.message
         })
-        
+         
     }
 }
 
@@ -60,7 +62,7 @@ exports.verifyPayment = async (req, res) => {
     try {
         const { reference } = req.query;
         const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`,{
-            headers: { Authorization: ` Bearer ${secret_key}`}
+            headers: { Authorization: `Bearer ${secret_key}`}
         });
         const { data } = response?.data;
 

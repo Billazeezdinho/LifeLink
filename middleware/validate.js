@@ -24,40 +24,64 @@ exports.registerValidate = async (req, res, next) =>{
             "string.pattern.base": "Email should not contain spaces"
         }),
 
-    password: Joi.string()
-        .min(8)
-        .pattern(/^\S+$/) 
+        password: Joi.string()
+        .min(6)
         .required()
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/)
         .messages({
-            "any.required": "Password is required",
             "string.empty": "Password cannot be empty",
-            "string.min": "Password must be at least 8 characters long",
-            "string.pattern.base": "Password should not contain spaces"
+            "string.min": "Password must be at least 6 characters long",
+            "string.pattern.base": "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character [!@#$%^&*]",
+            "any.required": "Password is required"
+        }),
+        bloodType: Joi.string()
+        .required()
+        .trim()
+        .messages({
+            "any.required": 'bloodType is required',
+            "string.empty": "bloodType cannot be empty"
+        }),
+        location: Joi.string()
+        .required()
+        .trim()
+        .min(3)
+        .messages({
+            "any.required": 'location is required',
+            "string.empty": "location cannot be empty",
+            "string.min": "location must be at least 3 characters long"
+
+        }),
+        age: Joi.string()
+        .required()
+        .trim()
+        .messages({
+            "any.required": 'age is required',
+            "string.empty": "age cannot be empty"
         })
-
-
-
-
-        // email: Joi.string()
-        // .email()
-        // .required()
-        // .messages({
-        //     "string.email": "Invalid email format",
-        //     "any.required":"Email is required"
-        // }),
-        // password: Joi.string()
-        // .min(8)
-        // .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/)
-        // .required()
-        // .messages({
-        //     "any.required": "Password is required",
-        //     "string.empty": " password cannot be empty",
-        //     "string.pattern.base": "Password must be minimum of 8 character and include at least one UpperCase, Lowercase and a special character [!@#$%^&*].",
-        // })
-
     })
     const result = schema.validate(req.body, {abortEarly: false})
     console.log(result)
+    next();  
+};
+
+exports.loginValidator = (req, res, next) => {
+    const schema = Joi.object({
+        email: Joi.string().email().required().messages({
+            "any.required": "Email is required",
+            "string.email": "Invalid email address"
+        }),
+        password: Joi.string().required().messages({
+            "any.required": "Password is required",
+            "string.empty": "Password cannot be empty"
+        })
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        const errors = error.details.map(detail => detail.message);
+        return res.status(400).json({ errors });
+    }
+
     next();
-    
-} ;
+};

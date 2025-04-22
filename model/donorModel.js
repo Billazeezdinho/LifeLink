@@ -12,7 +12,7 @@ const donorSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-      lowerCase: true,
+      lowercase: true,
       unique: true
     },
     password: {
@@ -29,13 +29,26 @@ const donorSchema = new mongoose.Schema(
     age: {
       type: String,
       required: true,
-    
     },
+    isVerified:{
+    type: Boolean,
+    default: false
+  },
     gender: {
+      type: String,
+      trim: true,
+      enum: ['male', 'female', 'other']
+    },
+    phoneNumber: {
       type: String,
     },
     profilePics: {
       type: String
+    },
+    role: {
+      type: String,
+      enum: ['donor', 'hospital'],
+      default: 'donor'
     },
     status: {
       type: String,
