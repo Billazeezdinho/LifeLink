@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
       try {
         //Extract required data from request body
         const { fullName, email, password, bloodType, location, age  } = req.body;
-        const hospitaEmail = await hospital.findOne({ email: email.toLowerCase()});
+        const hospitalEmail = await hospitalModel.findOne({ email: email.toLowerCase()});
         if(hospitalEmail){
           return res.status(400).json({
             message: `Email ${email} is already registered as Hospital`
