@@ -4,6 +4,7 @@ const Hospital = require("../model/hospitalModel");
 const {appointmentModel} = require("../model/appointmentModel"); 
 const KYC = require('../model/kycModel');
 const bcrypt = require("bcrypt"); 
+const { unlink } = require('fs/promises'); 
 const jwt = require("jsonwebtoken"); 
 const { resetMail } = require("../utils/resetMail"); 
 const { sendEmail } = require("../utils/sendEmail");
@@ -524,61 +525,131 @@ exports.resetPassword = async (req, res) => {
 };
 
 
+
 exports.submitKYC = async (req, res) => {
+  let uploadedFilePaths = [];
   try {
-    const { hospital } = req.user; 
+    const hospital = req.user; 
+
     if (!hospital || !hospital._id) {
       return res.status(401).json({ message: 'Unauthorized. Hospital information not found.' });
     }
+
     const hospitalId = hospital._id;
     const { licenseNumber } = req.body;
     const files = req.files;
-    if (!licenseNumber || !files) {
-      return res.status(400).json({ message: 'License number and documents are required.' });
+
+    if (!licenseNumber || !files || !files.facilityImage || !files.accreditedCertificate || !files.utilityBill) {
+      return res.status(400).json({ message: 'License number and all required documents are needed.' });
     }
 
-    // Check if there is an existing KYC document for the hospital
+    
     const existingKYC = await KYC.findOne({ hospital: hospitalId });
 
-    // If a previous KYC exists, check its status
     if (existingKYC) {
       if (existingKYC.status === 'pending') {
-        return res.status(400).json({
-          message: 'A KYC is already pending for this hospital. Resubmission is not allowed.',
-        });
+        return res.status(400).json({ message: 'A KYC is already pending. Resubmission not allowed.' });
       }
-
       if (existingKYC.status === 'declined') {
-        await KYC.findByIdAndDelete(existingKYC._id); // Delete the old declined KYC document
+        await KYC.findByIdAndDelete(existingKYC._id);
       }
     }
 
-    // Upload files to Cloudinary
+    
     const facilityImageUpload = await cloudinary.uploader.upload(files.facilityImage[0].path);
     const certificateUpload = await cloudinary.uploader.upload(files.accreditedCertificate[0].path);
     const utilityBillUpload = await cloudinary.uploader.upload(files.utilityBill[0].path);
 
-    // Save the new KYC data
+    // Track uploaded local files to unlink later
+    uploadedFilePaths.push(files.facilityImage[0].path, files.accreditedCertificate[0].path, files.utilityBill[0].path);
+
+    // Save new KYC record
     const kycData = await KYC.create({
       hospital: hospitalId,
       facilityImage: facilityImageUpload.secure_url,
       accreditedCertificate: certificateUpload.secure_url,
       licenseNumber,
       utilityBill: utilityBillUpload.secure_url,
-      status: 'pending', // Set status to 'pending' for new submissions
+      status: 'pending',
     });
 
-    // Mark hospital as KYC complete (optional, depends on your logic)
-    await Hospital.findByIdAndUpdate(hospitalId, { kycCompleted: true });
-    uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
-    res.status(201).json({ message: 'KYC submitted successfully', kycData });
-  } catch (error) {
-    if (uploadedFilePaths.length > 0) {
-      uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
+    // Update hospital kycCompleted field
+    await hospitalModel.findByIdAndUpdate(hospitalId, { kycCompleted: true });
+
+    // Delete local files after uploading
+    for (const filePath of uploadedFilePaths) {
+      await unlink(filePath);
     }
+
+    res.status(201).json({ message: 'KYC submitted successfully', kycData });
+
+  } catch (error) {
+    // Clean up uploaded local files if error occurs
+    if (uploadedFilePaths.length > 0) {
+      for (const filePath of uploadedFilePaths) {
+        await unlink(filePath);
+      }
+    }
+    console.error(error);
     res.status(500).json({ message: 'KYC submission failed', error: error.message });
   }
 };
+
+// exports.submitKYC = async (req, res) => {
+//   try {
+//     const { hospital } = req.user; 
+//     if (!hospital || !hospital._id) {
+//       return res.status(401).json({ message: 'Unauthorized. Hospital information not found.' });
+//     }
+//     const hospitalId = hospital._id;
+//     const { licenseNumber } = req.body;
+//     const files = req.files;
+//     if (!licenseNumber || !files) {
+//       return res.status(400).json({ message: 'License number and documents are required.' });
+//     }
+
+//     // Check if there is an existing KYC document for the hospital
+//     const existingKYC = await KYC.findOne({ hospital: hospitalId });
+
+//     // If a previous KYC exists, check its status
+//     if (existingKYC) {
+//       if (existingKYC.status === 'pending') {
+//         return res.status(400).json({
+//           message: 'A KYC is already pending for this hospital. Resubmission is not allowed.',
+//         });
+//       }
+
+//       if (existingKYC.status === 'declined') {
+//         await KYC.findByIdAndDelete(existingKYC._id); // Delete the old declined KYC document
+//       }
+//     }
+
+//     // Upload files to Cloudinary
+//     const facilityImageUpload = await cloudinary.uploader.upload(files.facilityImage[0].path);
+//     const certificateUpload = await cloudinary.uploader.upload(files.accreditedCertificate[0].path);
+//     const utilityBillUpload = await cloudinary.uploader.upload(files.utilityBill[0].path);
+
+//     // Save the new KYC data
+//     const kycData = await KYC.create({
+//       hospital: hospitalId,
+//       facilityImage: facilityImageUpload.secure_url,
+//       accreditedCertificate: certificateUpload.secure_url,
+//       licenseNumber,
+//       utilityBill: utilityBillUpload.secure_url,
+//       status: 'pending', // Set status to 'pending' for new submissions
+//     });
+
+//     // Mark hospital as KYC complete (optional, depends on your logic)
+//     await Hospital.findByIdAndUpdate(hospitalId, { kycCompleted: true });
+//     uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
+//     res.status(201).json({ message: 'KYC submitted successfully', kycData });
+//   } catch (error) {
+//     if (uploadedFilePaths.length > 0) {
+//       uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
+//     }
+//     res.status(500).json({ message: 'KYC submission failed', error: error.message });
+//   }
+// };
 
 exports.getHospitalAppointments = async (req, res) => {
   try {
@@ -718,3 +789,76 @@ exports.deleteBloodRequest = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
+
+// exports.respondToAppointment = async (req, res) => {
+//   try {
+//     const { appointmentId } = req.params;
+//     const { status, newDate, newTime } = req.body;
+
+    
+//     if (!['confirmed', 'cancelled', 'rescheduled'].includes(status)) {
+//       return res.status(400).json({ message: 'Invalid status provided.' });
+//     }
+
+    
+//     const appointment = await appointmentModel.findById(appointmentId).populate('donor').populate('hospital');
+//     if (!appointment) {
+//       return res.status(404).json({ message: 'Appointment not found.' });
+//     }
+
+   
+//     if (status === 'rescheduled') {
+//       if (!newDate || !newTime) {
+//         return res.status(400).json({ message: 'New date and time are required for rescheduling.' });
+//       }
+//       appointment.date = newDate;
+//       appointment.time = newTime;
+//     }
+
+//     appointment.status = status;
+//     await appointment.save();
+
+//     let emailSubject, emailText, notificationMessage;
+
+//     if (status === 'confirmed') {
+//       emailSubject = 'Appointment Confirmed';
+//       emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been confirmed.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using LifeLink.`;
+//       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been confirmed.`;
+//     } else if (status === 'cancelled') {
+//       emailSubject = 'Appointment Cancelled';
+//       emailText = `Hello ${appointment.donor.fullName},\n\nWe regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancelled.\n\nThank you for using LifeLink.`;
+//       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been cancelled.`;
+//     } else if (status === 'rescheduled') {
+//       emailSubject = 'Appointment Rescheduled';
+//       emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been rescheduled.\n\nNew Date: ${appointment.date}\nNew Time: ${appointment.time}\n\nThank you for using LifeLink.`;
+//       notificationMessage = `Your appointment has been rescheduled to ${appointment.date.toDateString()} at ${appointment.time}.`;
+//     }
+
+    
+//     await sendMail({
+//       email: appointment.donor.email,
+//       subject: emailSubject,
+//       text: emailText,
+//     });
+
+    
+//     await donorModel.findByIdAndUpdate(appointment.donor._id, {
+//       $push: {
+//         notifications: {
+//           message: notificationMessage,
+//           from: 'LifeLink',
+//           date: new Date(),
+//         },
+//       },
+//     });
+
+//     return res.status(200).json({
+//       message: `Appointment ${status} successfully.`,
+//       appointment,
+//     });
+
+//   } catch (error) {
+//     console.error('Error responding to appointment:', error.message);
+//     return res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };

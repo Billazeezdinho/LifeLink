@@ -812,8 +812,9 @@ exports.bookAppointment = async (req, res) => {
 
           await hospitalModel.findByIdAndUpdate(hospitalId, {
             $push: {
+              appointmentId: appointment._id,
               notifications: {
-                message: `${appointment._id} New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
+                message: `New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
                 from: 'LifeLink',
                 date: new Date()
               }
@@ -838,7 +839,7 @@ exports.bookAppointment = async (req, res) => {
       console.error(err);
       res.status(500).json({ message: 'Error booking appointment: ' + err.message });
     }
-  };
+  };  
     
 exports.deleteDonor = async (req, res) => {
     try {
