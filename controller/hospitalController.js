@@ -12,7 +12,6 @@ require("dotenv").config();
 const BloodRequest = require('../model/bloodRequestModel');
 const multer = require('multer');
 const path = require('path');
-const mongoose = require('mongoose')
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
@@ -148,101 +147,6 @@ exports.login = async (req, res) => {
       res.status(500).json({ message: 'Server error', error: err.message });
     }
   };
- 
-
-// exports.submitBloodRequest = async (req, res) => { 
-//   try {
-//     let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
-
-//     if (req.user.role !== 'hospital') {
-//       return res.status(403).json({ message: 'Only hospitals can make a blood request' });
-//     }
-
-//     if (typeof amount === 'string') {
-//       amount = parseFloat(amount.replace(/,/g, ''));
-//     }
-
-//     if (!numberOfPints) {
-//       return res.status(400).json({ message: "numberOfPints is required." });
-//     }
-
-//     const formattedPreferredDate = moment(preferredDate, 'YYYY-MM-DD');
-
-//     // Create the blood request
-//     const request = new BloodRequest({
-//       hospital: req.user._id,
-//       bloodGroup,
-//       numberOfPints,
-//       preferredDate: formattedPreferredDate,
-//       urgencyLevel,
-//       amount,
-//     });
-
-//     await request.save();
-
-//     // 🔥 New part: notify all donors
-//     const donors = await donorModel.find({});
-//     const donorEmails = [];
-
-//     if (donors.length > 0) {
-//       const updatePromises = donors.map(async (donor) => {
-//         // Check if donor is missing required fields and skip if invalid
-//         if (!donor.fullName || !donor.email || !donor.location || !donor.age || !donor.gender) {
-//           console.log(`Skipping donor with missing fields: ${donor._id}`);
-//           return; // Skip updating this donor if any required fields are missing
-//         }
-
-//         // Add notification to donor
-//         donor.notifications.push({
-//           message: `New blood request for ${bloodGroup} blood group. Check the blood requests page.`,
-//           from: 'LifeLink',
-//           date: new Date()
-//         });
-
-//         await donor.save(); // Save the donor with the new notification
-//         donorEmails.push(donor.email); // Collect donor emails for notifications
-//       });
-
-//       await Promise.all(updatePromises);
-//     }
-
-//     // Send emails to all donors if email addresses are collected
-//     if (donorEmails.length > 0) {
-//       const emailPromises = donorEmails.map(email => 
-//         sendEmail({
-//           to: email,
-//           subject: 'Urgent Blood Donation Request',
-//           html: `
-//             <h2>Urgent Blood Request</h2>
-//             <p>A new blood donation request has been posted for blood group <strong>${bloodGroup}</strong>.</p>
-//             <p>Please log in to LifeLink to check the details and schedule a donation if you can help.</p>
-//           `
-//         })
-//       );
-
-//       await Promise.all(emailPromises);
-//     }
-
-//     const responseData = {
-//       _id: request._id,
-//       hospital: request.hospital,
-//       bloodGroup: request.bloodGroup,
-//       numberOfPints: request.numberOfPints,
-//       preferredDate: moment(request.preferredDate).format('YYYY-MM-DD'), 
-//       urgencyLevel: request.urgencyLevel,
-//       amount: request.amount,
-//       status: request.status,
-//       createdAt: moment(request.createdAt).format('YYYY-MM-DD HH:mm'),
-//       updatedAt: moment(request.updatedAt).format('YYYY-MM-DD HH:mm'),
-//     };
-
-//     res.status(201).json({ message: 'Blood request submitted successfully', data: responseData });
-
-//   } catch (error) {
-//     console.error('Error submitting blood request:', error.message);
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
 exports.submitBloodRequest = async (req, res) => { 
   try {
     let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
@@ -567,13 +471,13 @@ exports.forgotPassword = async (req, res) => {
       </body>
       </html>
     `;
-
+    const mailDetails = {
+      email: hospital.email,
+      subject: "passWord Reset Request",
+      html: htmlContent,
+    };
     // Send the reset email with HTML
-    await sendEmail(
-      email,
-      'Password Reset Request',
-      htmlContent
-    );
+    await sendEmail(mailDetails);
 
     res.status(200).json({
       message: 'Password reset link sent to your email',
@@ -773,9 +677,6 @@ exports.getAllHospitalBloodRequests = async (req, res) => {
     res.status(500).json({ message: `Internal Server Error: ${error.message}` });
   }
 };
-
-
-
 
 exports.deleteBloodRequest = async (req, res) => {
   try {
