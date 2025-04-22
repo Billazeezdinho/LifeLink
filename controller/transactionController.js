@@ -1,93 +1,108 @@
-const {transactionModel} = require('../model/transactionModel');
-const axios = require('axios')
+const { transactionModel } = require('../model/transactionModel');
+const axios = require('axios');
 const otpGenerator = require('otp-generator');
-const otp = otpGenerator.generate(12, {specialChars: false})
-const ref =  `LifeLink-ch6-${otp}`;
-const secret_key = process.env.korapay_secret_key
 
-exports.initializePayment = async (req, res) =>{
+const korapay_secret_key = process.env.korapay_secret_key;
+const frontendRedirectUrl = 'https://lifelink-xi.vercel.app/paymentcheck'; 
+
+// PAYMENT PLAN PRICES
+const plans = {
+    monthly: 10000,
+    quarterly: 30000,
+    yearly: 100000,
+};
+
+// Initialize Payment
+exports.initializePayment = async (req, res) => {
     try {
-        const { email, name, amount } = req.body;
-        if(!email || !amount || !name){
-            return res.status(400).json({
-                message: 'Please input all field'
-            })
-        };
-        const formattedDate = new Date().toLocaleString()
-        console.log('Process: ',process.env.korapay_secret_key)
-        console.log('Secret',secret_key)
+        const { email, name, plan } = req.body;
+
+        if (!email || !name || !plan) {
+            return res.status(400).json({ message: 'Email, Name and Plan are required' });
+        }
+
+        if (!plans[plan]) {
+            return res.status(400).json({ message: 'Invalid Plan. Choose monthly, quarterly, or yearly.' });
+        }
+
+        const amount = plans[plan];
+        const formattedDate = new Date().toLocaleString();
+        const reference = `LifeLink-${otpGenerator.generate(10, { specialChars: false })}`;
+
+        // Prepare payment data
         const paymentData = {
             amount,
-            customer:{
-                name,
-                email
-            },
+            customer: { name, email },
             currency: 'NGN',
-            reference: ref
+            reference,
+            redirect_url: `${frontendRedirectUrl}?reference=${reference}`, 
         };
-        
-        const response = await axios.post('https://api.korapay.com/merchant/api/v1/charges/initialize', paymentData, {
-            headers: {
-                Authorization: `Bearer ${secret_key}`,
-                'Content-Type': 'application/json'
+
+        const response = await axios.post(
+            'https://api.korapay.com/merchant/api/v1/charges/initialize',
+            paymentData,
+            {
+                headers: {
+                    Authorization: `Bearer ${korapay_secret_key}`,
+                    'Content-Type': 'application/json'
+                }
             }
-        });
-        
+        );
+
         const { data } = response?.data;
+
+        // Save Transaction
         const payment = new transactionModel({
             name,
             email,
             amount,
-            reference:paymentData.reference,
+            reference,
             paymentDate: formattedDate
-        })
+        });
         await payment.save();
 
         res.status(200).json({
-            message:'payment initialize Successfully',
-            data:{
-                reference: data?.reference,
-                checkout_url: data?.checkout_url
+            message: 'Payment initialized successfully',
+            data: {
+                checkout_url: data?.checkout_url,
+                reference
             }
-        })
-        
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({
-            message: ' Internal server error ' + error.message
-        })
-         
-    }
-}
+        });
 
+    } catch (error) {
+        console.error('Initialize Payment Error:', error.message);
+        res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+    }
+};
+
+// Verify Payment
 exports.verifyPayment = async (req, res) => {
     try {
         const { reference } = req.query;
-        const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`,{
-            headers: { Authorization: `Bearer ${secret_key}`}
-        });
+
+        if (!reference) {
+            return res.status(400).json({ message: 'Reference is required' });
+        }
+
+        const response = await axios.get(
+            `https://api.korapay.com/merchant/api/v1/charges/${reference}`,
+            {
+                headers: { Authorization: `Bearer ${korapay_secret_key}` }
+            }
+        );
+
         const { data } = response?.data;
 
-        if(data?.status && data?.status === 'success' ){
-            const payment = await transactionModel.findOneAndUpdate({reference}, {status: 'success'}, {new:true});
-            res.status(200).json({
-                message: 'Payment Verification Successfully',
-                data: payment
-            })
-        }else{
-            const payment = await transactionModel.findOneAndUpdate({reference}, {status: 'failed'}, {new:true});
-            res.status(200).json({
-                message: 'Payment Verification Failed',
-                data: payment
-            })
-
+        if (data?.status === 'success') {
+            await transactionModel.findOneAndUpdate({ reference }, { status: 'success' }, { new: true });
+            return res.redirect(`${frontendRedirectUrl}?status=success&reference=${reference}`);
+        } else {
+            await transactionModel.findOneAndUpdate({ reference }, { status: 'failed' }, { new: true });
+            return res.redirect(`${frontendRedirectUrl}?status=failed&reference=${reference}`);
         }
-        
+
     } catch (error) {
-        console.log(error.message)
-        res.status(500).json({
-            message: 'Internal Server Error' + error.message
-        })
-        
+        console.error('Verify Payment Error:', error.message);
+        res.status(500).json({ message: 'Internal Server Error: ' + error.message });
     }
-}
+};

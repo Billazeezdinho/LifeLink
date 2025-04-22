@@ -23,7 +23,7 @@ const router = require('express').Router();
  *             required:
  *               - email
  *               - name
- *               - amount
+ *               - plan
  *             properties:
  *               email:
  *                 type: string
@@ -32,9 +32,10 @@ const router = require('express').Router();
  *               name:
  *                 type: string
  *                 example: John Doe
- *               amount:
- *                 type: number
- *                 example: 10000
+ *               plan:
+ *                 type: string
+ *                 enum: [monthly, quarterly, yearly]
+ *                 example: monthly
  *     responses:
  *       200:
  *         description: Payment initialized successfully
@@ -45,7 +46,7 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: payment initialize Successfully
+ *                   example: Payment initialized successfully
  *                 data:
  *                   type: object
  *                   properties:
@@ -57,7 +58,7 @@ const router = require('express').Router();
  *                       format: uri
  *                       example: https://checkout.korapay.com/abc123
  *       400:
- *         description: Missing required fields
+ *         description: Missing required fields or invalid plan selected
  *       500:
  *         description: Internal server error
  */
@@ -86,7 +87,7 @@ router.post('/initialize', initializePayment);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Payment Verification Successfully
+ *                   example: Payment Verification Successful
  *                 data:
  *                   type: object
  *                   properties:
@@ -108,6 +109,8 @@ router.post('/initialize', initializePayment);
  *                     paymentDate:
  *                       type: string
  *                       example: 4/10/2025, 4:32:58 PM
+ *       404:
+ *         description: Payment not found with the provided reference
  *       500:
  *         description: Internal server error
  */
