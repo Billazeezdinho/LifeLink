@@ -813,7 +813,7 @@ exports.bookAppointment = async (req, res) => {
           await hospitalModel.findByIdAndUpdate(hospitalId, {
             $push: {
               notifications: {
-                message: `New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
+                message: `${appointment._id} New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
                 from: 'LifeLink',
                 date: new Date()
               }

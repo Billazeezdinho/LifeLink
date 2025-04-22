@@ -11,8 +11,7 @@ const sendMail = require("../utils/email");
 require("dotenv").config(); 
 const BloodRequest = require('../model/bloodRequestModel');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const welcomeMail = require('../utils/welcome')
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
 const moment = require('moment');
