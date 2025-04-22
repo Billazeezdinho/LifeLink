@@ -595,7 +595,7 @@ const kycUpload = upload.fields([
 
 /**
  * @swagger
- * /hospital/kyc:
+ * /-----/kyc:
  *   post:
  *     summary: Submit KYC
  *     tags: [Hospital]
@@ -630,6 +630,6 @@ const kycUpload = upload.fields([
  *         description: Internal server error
  */
 
-router.post('/hospital/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC);
+router.post('/-----/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC);
 
 module.exports = router;

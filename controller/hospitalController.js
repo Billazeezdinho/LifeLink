@@ -578,7 +578,15 @@ exports.resetPassword = async (req, res) => {
 
 exports.submitKYC = async (req, res) => {
   try {
-    const { hospitalId } = req.user;
+    const { hospital } = req.user;
+    if (!mongoose.Types.ObjectId.isValid(hospital._id)) {
+  return res.status(400).json({ message: "Invalid hospital ID" });
+}
+
+const hospitalId = await Hospital.findById(hospital._id);
+if (!hospitalId) {
+  return res.status(404).json({ message: "Hospital not found" });
+}
     const { licenseNumber } = req.body;
     const files = req.files;
 
@@ -638,7 +646,6 @@ exports.getHospitalAppointments = async (req, res) => {
   }
 };
 
-// Accept or Reject an appointment
 exports.respondToAppointment = async (req, res) => {
   try {
     const { appointmentId } = req.params;
@@ -661,10 +668,11 @@ exports.respondToAppointment = async (req, res) => {
     appointment.status = status;
     await appointment.save();
 
-    await sendMail(
-      appointment.donor.email,
-      `Appointment ${status === "accepted" ? "Accepted" : "Declined"}`,
-      `Hello ${appointment.donor.fullName},
+    const mailDetails = {
+      
+        email:appointment.donor.email,
+        subject:`Appointment ${status === "accepted" ? "Accepted" : "Declined"}`,
+        html:`Hello ${appointment.donor.fullName},
 
 Your appointment request has been ${status} by the hospital.
 
@@ -672,8 +680,8 @@ Please log in to your LifeLink dashboard to view more details.
 
 Thank you,
 LifeLink Team`
-    );
-
+    }
+    await sendMail(mailDetails)
     await donorModel.findByIdAndUpdate(appointment.donor._id, {
       $push: {
         notifications: {
