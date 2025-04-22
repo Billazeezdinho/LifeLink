@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { donorModel } = require("../model/donorModel");
 const hospitalModel = require('../model/hospitalModel'); 
 const adminModel = require('../model/adminModel');
-
+const { transactionModel } = require('../model/transactionModel');
 const blacklistedTokens = new Set();
 
 const auth = async (req, res, next) => {
@@ -66,8 +66,34 @@ const roleAuth = (allowedRoles) => {
   };
 }
 
+const hospitalMustBePaid = async (req, res, next) => {
+  try {
+    const hospitalId = req.user.id; 
+
+    const payment = await transactionModel.findOne({
+      hospital: hospitalId,
+      status: 'success'
+    });
+
+    if (!payment) {
+      return res.status(403).json({
+        message: 'Access Denied: Please complete payment to continue.'
+      });
+    }
+
+    next(); 
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: 'Internal server error ' + error.message
+    });
+  }
+};
+
+
 module.exports = {
   auth,
   roleAuth,
   blacklistedTokens,
+  hospitalMustBePaid
 };

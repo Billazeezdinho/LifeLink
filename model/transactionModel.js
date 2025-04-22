@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
+    hospital: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hospital', 
+        required: true
+      },
     email: {
         type: String,
         required:true

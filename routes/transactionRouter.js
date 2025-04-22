@@ -1,4 +1,5 @@
 const { initializePayment, verifyPayment } = require('../controller/transactionController');
+const { auth } = require('../middleware/authMiddleware');
 const router = require('express').Router();
 
 /**
@@ -14,6 +15,8 @@ const router = require('express').Router();
  *   post:
  *     summary: Initialize a new payment
  *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -62,7 +65,7 @@ const router = require('express').Router();
  *       500:
  *         description: Internal server error
  */
-router.post('/initialize', initializePayment);
+router.post('/initialize', auth, initializePayment);
 
 /**
  * @swagger

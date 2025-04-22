@@ -1,6 +1,7 @@
 const { transactionModel } = require('../model/transactionModel');
 const axios = require('axios');
 const otpGenerator = require('otp-generator');
+const hospitalModel = require('../model/hospitalModel');
 
 const korapay_secret_key = process.env.korapay_secret_key;
 const frontendRedirectUrl = 'https://lifelink-xi.vercel.app/paymentcheck'; 
@@ -16,6 +17,11 @@ const plans = {
 exports.initializePayment = async (req, res) => {
     try {
         const { email, name, plan } = req.body;
+        const hospitalId = req.user.id;
+        const hospital = await hospitalModel.findById(hospitalId);
+        if (!hospital) {
+            return res.status(404).json({ message: 'Hospital not found' });
+        }
 
         if (!email || !name || !plan) {
             return res.status(400).json({ message: 'Email, Name and Plan are required' });
@@ -53,6 +59,7 @@ exports.initializePayment = async (req, res) => {
 
         // Save Transaction
         const payment = new transactionModel({
+            hospital: hospitalId,
             name,
             email,
             amount,
