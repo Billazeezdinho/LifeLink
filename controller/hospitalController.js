@@ -82,7 +82,6 @@ exports.register =async (req, res) => {
   }
 };
 
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -129,7 +128,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
   exports.searchForDonors = async (req, res) => {
     try {
       
@@ -146,7 +144,7 @@ exports.login = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: 'Server error', error: err.message });
     }
-  };
+};
 exports.submitBloodRequest = async (req, res) => { 
   try {
     let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
@@ -177,21 +175,26 @@ exports.submitBloodRequest = async (req, res) => {
 
     await request.save();
 
-    // 🔥 Instead of loading and saving each donor, just push a notification to all at once
+   
+    const hospitalName = req.user.fullName || 'Hospital';
     await donorModel.updateMany(
       {},
-      {
-        $push: {
-          notifications: {
-            message: `New blood request for ${bloodGroup} blood group. Check the blood requests page.`,
-            from: 'LifeLink',
-            date: new Date()
-          }
-        }
+      { $push: {
+        notifications: {
+          message: `New blood request (ID: ${request._id}) from ${hospitalName} for ${bloodGroup} blood group.`,
+          from: `fullName: ${hospitalName}`,
+          date: new Date()
+        } 
+      }
+        // $push: {
+        //   notifications: {
+        //     message: `New blood request for ${bloodGroup} blood group. Check the blood requests page.`,
+        //     from: 'LifeLink',
+        //     date: new Date()
+        //   }
+        // }
       }
     );
-
-    // Fetch emails only
     const donors = await donorModel.find({}, 'email');
     const donorEmails = donors.map(donor => donor.email).filter(email => !!email);
 
@@ -595,62 +598,6 @@ exports.submitKYC = async (req, res) => {
   }
 };
 
-// exports.submitKYC = async (req, res) => {
-//   try {
-//     const { hospital } = req.user; 
-//     if (!hospital || !hospital._id) {
-//       return res.status(401).json({ message: 'Unauthorized. Hospital information not found.' });
-//     }
-//     const hospitalId = hospital._id;
-//     const { licenseNumber } = req.body;
-//     const files = req.files;
-//     if (!licenseNumber || !files) {
-//       return res.status(400).json({ message: 'License number and documents are required.' });
-//     }
-
-//     // Check if there is an existing KYC document for the hospital
-//     const existingKYC = await KYC.findOne({ hospital: hospitalId });
-
-//     // If a previous KYC exists, check its status
-//     if (existingKYC) {
-//       if (existingKYC.status === 'pending') {
-//         return res.status(400).json({
-//           message: 'A KYC is already pending for this hospital. Resubmission is not allowed.',
-//         });
-//       }
-
-//       if (existingKYC.status === 'declined') {
-//         await KYC.findByIdAndDelete(existingKYC._id); // Delete the old declined KYC document
-//       }
-//     }
-
-//     // Upload files to Cloudinary
-//     const facilityImageUpload = await cloudinary.uploader.upload(files.facilityImage[0].path);
-//     const certificateUpload = await cloudinary.uploader.upload(files.accreditedCertificate[0].path);
-//     const utilityBillUpload = await cloudinary.uploader.upload(files.utilityBill[0].path);
-
-//     // Save the new KYC data
-//     const kycData = await KYC.create({
-//       hospital: hospitalId,
-//       facilityImage: facilityImageUpload.secure_url,
-//       accreditedCertificate: certificateUpload.secure_url,
-//       licenseNumber,
-//       utilityBill: utilityBillUpload.secure_url,
-//       status: 'pending', // Set status to 'pending' for new submissions
-//     });
-
-//     // Mark hospital as KYC complete (optional, depends on your logic)
-//     await Hospital.findByIdAndUpdate(hospitalId, { kycCompleted: true });
-//     uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
-//     res.status(201).json({ message: 'KYC submitted successfully', kycData });
-//   } catch (error) {
-//     if (uploadedFilePaths.length > 0) {
-//       uploadedFilePaths.forEach(filePath => unlinkLocalFile(filePath));
-//     }
-//     res.status(500).json({ message: 'KYC submission failed', error: error.message });
-//   }
-// };
-
 exports.getHospitalAppointments = async (req, res) => {
   try {
     if (req.user.role !== "hospital") {
@@ -671,55 +618,55 @@ exports.getHospitalAppointments = async (req, res) => {
 };
 
 
-exports.respondToAppointment = async (req, res) => {
-  try {
-    const { appointmentId } = req.params;
-    const { status } = req.body; // expected 'accepted' or 'declined'
+// exports.respondToAppointment = async (req, res) => {
+//   try {
+//     const { appointmentId } = req.params;
+//     const { status } = req.body; // expected 'accepted' or 'declined'
 
-    if (!["accepted", "declined"].includes(status)) {
-      return res.status(400).json({ message: "Status must be either 'accepted' or 'declined'." });
-    }
+//     if (!["accepted", "declined"].includes(status)) {
+//       return res.status(400).json({ message: "Status must be either 'accepted' or 'declined'." });
+//     }
 
-    const appointment = await appointmentModel.findById(appointmentId).populate("donor", "fullName email");
+//     const appointment = await appointmentModel.findById(appointmentId).populate("donor", "fullName email");
 
-    if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found." });
-    }
+//     if (!appointment) {
+//       return res.status(404).json({ message: "Appointment not found." });
+//     }
 
-    if (appointment.hospital.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You can only manage your own hospital appointments." });
-    }
+//     if (appointment.hospital.toString() !== req.user.id) {
+//       return res.status(403).json({ message: "You can only manage your own hospital appointments." });
+//     }
 
-    appointment.status = status;
-    await appointment.save();
+//     appointment.status = status;
+//     await appointment.save();
 
-    await sendMail(
-      appointment.donor.email,
-      `Appointment ${status === "accepted" ? "Accepted" : "Declined"}`,
-      `Hello ${appointment.donor.fullName},
+//     await sendMail(
+//       appointment.donor.email,
+//       `Appointment ${status === "accepted" ? "Accepted" : "Declined"}`,
+//       `Hello ${appointment.donor.fullName},
 
-Your appointment request has been ${status} by the hospital.
+// Your appointment request has been ${status} by the hospital.
 
-Please log in to your LifeLink dashboard to view more details.
+// Please log in to your LifeLink dashboard to view more details.
 
-Thank you,
-LifeLink Team`
-    );
+// Thank you,
+// LifeLink Team`
+//     );
 
-    await donorModel.findByIdAndUpdate(appointment.donor._id, {
-      $push: {
-        notifications: {
-          message: `Your appointment was ${status} by the hospital.`,
-          from: "Hospital",
-        },
-      },
-    });
+//     await donorModel.findByIdAndUpdate(appointment.donor._id, {
+//       $push: {
+//         notifications: {
+//           message: `Your appointment was ${status} by the hospital.`,
+//           from: "Hospital",
+//         },
+//       },
+//     });
 
-    res.status(200).json({ message: `Appointment ${status} successfully.` });
-  } catch (error) {
-    res.status(500).json({ message: "Server error while responding to appointment." + error.message });
-  }
-};
+//     res.status(200).json({ message: `Appointment ${status} successfully.` });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error while responding to appointment." + error.message });
+//   }
+// };
 
 exports.getAllHospitalBloodRequests = async (req, res) => {
   try {
@@ -790,75 +737,67 @@ exports.deleteBloodRequest = async (req, res) => {
   }
 };
 
-// exports.respondToAppointment = async (req, res) => {
-//   try {
-//     const { appointmentId } = req.params;
-//     const { status, newDate, newTime } = req.body;
+exports.respondToAppointment = async (req, res) => {
+
+  try {
+    const { appointmentId } = req.params;
+    const { status, newDate, newTime } = req.body;
 
     
-//     if (!['confirmed', 'cancelled', 'rescheduled'].includes(status)) {
-//       return res.status(400).json({ message: 'Invalid status provided.' });
-//     }
+    if (!['accepted', 'cancel', 'rescheduled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status provided.' });
+    }    
+    const appointment = await appointmentModel.findById(appointmentId).populate('donor').populate('hospital');
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+    if (status === 'rescheduled') {
+      if (!newDate || !newTime) {
+        return res.status(400).json({ message: 'New date and time are required for rescheduling.' });
+      }
+      appointment.date = newDate;
+      appointment.time = newTime;
+    }
+    appointment.status = status;
+    await appointment.save();
+    let emailSubject, emailText, notificationMessage;
+    if (status === 'accept') {
+      emailSubject = 'Appointment Accepted';
+      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been accepted.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using LifeLink.`;
+      notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been accepted.`;
+    } else if (status === 'cancel') {
+      emailSubject = 'Appointment Cancel';
+      emailText = `Hello ${appointment.donor.fullName},\n\n We regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancel.\n\n Thank you for using LifeLink.`;
+      notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been cancel.`;
+    } else if (status === 'rescheduled') {
+      emailSubject = 'Appointment Rescheduled';
+      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been rescheduled.\n\nNew Date: ${appointment.date}\nNew Time: ${appointment.time}\n\nThank you for using LifeLink.`;
+      notificationMessage = `Your appointment has been rescheduled to ${appointment.date.toDateString()} at ${appointment.time}.`;
+    }
 
     
-//     const appointment = await appointmentModel.findById(appointmentId).populate('donor').populate('hospital');
-//     if (!appointment) {
-//       return res.status(404).json({ message: 'Appointment not found.' });
-//     }
+    await sendMail({
+      email: appointment.donor.email,
+      subject: emailSubject,
+      text: emailText,
+    });
 
-   
-//     if (status === 'rescheduled') {
-//       if (!newDate || !newTime) {
-//         return res.status(400).json({ message: 'New date and time are required for rescheduling.' });
-//       }
-//       appointment.date = newDate;
-//       appointment.time = newTime;
-//     }
+    await donorModel.findByIdAndUpdate(appointment.donor._id, {
+      $push: {
+        notifications: {
+          message: notificationMessage,
+          from: `${appointment.hospital.fullName}`,
+          date: new Date(),
+        },
+      },
+    });
+    return res.status(200).json({
+      message: `Appointment ${status} successfully.`,
+      appointment,
+    });
 
-//     appointment.status = status;
-//     await appointment.save();
-
-//     let emailSubject, emailText, notificationMessage;
-
-//     if (status === 'confirmed') {
-//       emailSubject = 'Appointment Confirmed';
-//       emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been confirmed.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using LifeLink.`;
-//       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been confirmed.`;
-//     } else if (status === 'cancelled') {
-//       emailSubject = 'Appointment Cancelled';
-//       emailText = `Hello ${appointment.donor.fullName},\n\nWe regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancelled.\n\nThank you for using LifeLink.`;
-//       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been cancelled.`;
-//     } else if (status === 'rescheduled') {
-//       emailSubject = 'Appointment Rescheduled';
-//       emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been rescheduled.\n\nNew Date: ${appointment.date}\nNew Time: ${appointment.time}\n\nThank you for using LifeLink.`;
-//       notificationMessage = `Your appointment has been rescheduled to ${appointment.date.toDateString()} at ${appointment.time}.`;
-//     }
-
-    
-//     await sendMail({
-//       email: appointment.donor.email,
-//       subject: emailSubject,
-//       text: emailText,
-//     });
-
-    
-//     await donorModel.findByIdAndUpdate(appointment.donor._id, {
-//       $push: {
-//         notifications: {
-//           message: notificationMessage,
-//           from: 'LifeLink',
-//           date: new Date(),
-//         },
-//       },
-//     });
-
-//     return res.status(200).json({
-//       message: `Appointment ${status} successfully.`,
-//       appointment,
-//     });
-
-//   } catch (error) {
-//     console.error('Error responding to appointment:', error.message);
-//     return res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
+  } catch (error) {
+    console.error('Error responding to appointment:', error.message);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
