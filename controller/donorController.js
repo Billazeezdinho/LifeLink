@@ -1,4 +1,6 @@
   const { donorModel } = require('../model/donorModel');
+  const mongoose = require('mongoose');
+  const bloodRequestModel = require('../model/bloodRequestModel')
   const bcrypt = require('bcrypt');
   const jwt = require('jsonwebtoken');
   const resetMail = require("../utils/resetMail");
@@ -855,3 +857,52 @@ exports.deleteDonor = async (req, res) => {
       })
     }
   }
+
+  exports.oneBloodRequestById = async (req, res) => {
+    try {
+      const donor = req.user;
+  
+      if (!donor) {
+        return res.status(401).json({ message: "Unauthorized. Donor not found." });
+      }
+  
+      const bloodRequestId = req.params.bloodRequestId;
+      if (!mongoose.Types.ObjectId.isValid(bloodRequestId)) {
+        return res.status(400).json({ message: "Invalid blood request ID." });
+      }
+  
+      
+      const allBloodRequests = await bloodRequestModel.find().select('_id');
+      const bloodRequestIds = allBloodRequests.map(request => request._id.toString());
+      if (!bloodRequestIds.includes(bloodRequestId)) {
+        return res.status(404).json({ message: 'Blood request not found' });
+      }
+  
+      
+      const bloodRequest = await bloodRequestModel.findById(bloodRequestId)
+        .populate({
+          path: 'hospital',
+          select: 'fullName email location phone address city profilePics'
+        });
+  
+      res.status(200).json({
+        message: 'Blood request fetched successfully',
+        data: {
+          _id: bloodRequest._id,
+          hospital: bloodRequest.hospital,
+          bloodGroup: bloodRequest.bloodGroup,
+          numberOfPints: bloodRequest.numberOfPints,
+          preferredDate: bloodRequest.preferredDate,
+          urgencyLevel: bloodRequest.urgencyLevel,
+          amount: bloodRequest.amount,
+          status: bloodRequest.status,
+          createdAt: bloodRequest.createdAt,
+          updatedAt: bloodRequest.updatedAt,
+        }
+      });
+  
+    } catch (error) {
+      console.error('Error fetching blood request by ID:', error.message);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  };

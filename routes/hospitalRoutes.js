@@ -15,8 +15,8 @@ const {
   getHospitalAppointments,
   respondToAppointment,
   getOneHospital,
-  getAppointmentHistory,
-  getOneBloodRequestById,
+  getAppointmentHistory
+  
 } = require('../controller/hospitalController');
 
 // Import named exports from middleware
@@ -615,80 +615,5 @@ const kycUpload = upload.fields([
 router.post('/hospital/kyc', auth, roleAuth(['hospital']), kycUpload, submitKYC);
 
 
-/**
- * @swagger
- * /blood-request/{hospitalId}:
- *   get:
- *     summary: Get a single blood request by its ID
- *     description: Allows a verified donor to fetch the details of a specific blood request by its ID.
- *     tags:
- *       - Blood Requests
- *     security:
- *       - bearerAuth: []   # JWT Authentication
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the blood request to fetch
- *     responses:
- *       200:
- *         description: Blood request fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Blood request fetched successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     hospital:
- *                       type: object
- *                       properties:
- *                         fullName:
- *                           type: string
- *                         address:
- *                           type: string
- *                         phoneNumber:
- *                           type: string
- *                         city:
- *                           type: string
- *                         profilePics:
- *                           type: string
- *                     bloodGroup:
- *                       type: string
- *                     numberOfPints:
- *                       type: integer
- *                     preferredDate:
- *                       type: string
- *                       format: date
- *                     urgencyLevel:
- *                       type: string
- *                     amount:
- *                       type: number
- *                     status:
- *                       type: string
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *       401:
- *         description: Unauthorized. Donor not found.
- *       404:
- *         description: Blood request not found.
- *       500:
- *         description: Internal server error
- */
-
-// Route setup
-router.get('/blood-request/:hospitalId', auth,  getOneBloodRequestById);
 
 module.exports = router;

@@ -12,6 +12,7 @@ require("dotenv").config();
 const BloodRequest = require('../model/bloodRequestModel');
 const multer = require('multer');
 const path = require('path');
+const mongoose = require('mongoose')
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
@@ -745,7 +746,7 @@ exports.getAllHospitalBloodRequests = async (req, res) => {
       return res.status(404).json({ message: "Donor not found" });
     }
 
-    const bloodRequests = await bloodRequestModel.find({ })
+    const bloodRequests = await bloodRequestModel.find( )
       .populate({
         path: 'hospital',
         select: 'fullName address phoneNumber city profilePicture'
@@ -755,9 +756,9 @@ exports.getAllHospitalBloodRequests = async (req, res) => {
     if (!bloodRequests.length) {
       return res.status(404).json({ message: "No active blood requests found" });
     }
-
     res.status(200).json({
       message: "Active blood requests fetched successfully",
+      data: bloodRequests._id,
       donor: {
         fullName: donor.fullName,
         email: donor.email,
@@ -773,47 +774,7 @@ exports.getAllHospitalBloodRequests = async (req, res) => {
   }
 };
 
-exports.getOneBloodRequestById = async (req, res) => {
-  try {
-    const donor = req.user; 
 
-    if (!donor) {
-      return res.status(401).json({ message: "Unauthorized. Donor not found." });
-    }
-
-    const bloodRequestId = req.params.id;
-
-    const bloodRequest = await bloodRequestModel.findById(bloodRequestId)
-      .populate({
-        path: 'hospital',
-        select: 'fullName email location phone address city profilePics' 
-      });
-
-    if (!bloodRequest) {
-      return res.status(404).json({ message: 'Blood request not found' });
-    }
-
-    res.status(200).json({
-      message: 'Blood request fetched successfully',
-      data: {
-        _id: bloodRequest._id,
-        hospital: bloodRequest.hospital,
-        bloodGroup: bloodRequest.bloodGroup,
-        numberOfPints: bloodRequest.numberOfPints,
-        preferredDate: bloodRequest.preferredDate,
-        urgencyLevel: bloodRequest.urgencyLevel,
-        amount: bloodRequest.amount,
-        status: bloodRequest.status,
-        createdAt: bloodRequest.createdAt,
-        updatedAt: bloodRequest.updatedAt,
-      }
-    });
-
-  } catch (error) {
-    console.error('Error fetching blood request by ID:', error.message);
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
-  }
-};
 
 
 exports.deleteBloodRequest = async (req, res) => {

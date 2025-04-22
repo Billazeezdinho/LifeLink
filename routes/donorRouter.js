@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor, getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments, verifyDonors, resendVerificationEmail, getHospitalDonationsByStatus } = require('../controller/donorController');
+const { register, login, resetNewPassword, changePassword, forgotPassword, scheduleDonation, getAllDonor, getDashboard, getDonationsByStatus, deleteDonor, viewHospitals, bookAppointment, logOut, updateProfile, getOneDonorById, UpdateDonorDetails, getDonorNotifications, cancelAppointment, getDonorAppointments, verifyDonors, resendVerificationEmail, getHospitalDonationsByStatus, oneBloodRequestById } = require('../controller/donorController');
 const { registerValidate, loginValidator } = require('../middleware/validate');
 const {auth, roleAuth} = require('../middleware/authMiddleware');
 const upload= require('../utils/multer');
@@ -11,6 +11,82 @@ const { getAllHospitalBloodRequests, deleteBloodRequest } = require('../controll
  *   - name: Donor
  *     description: Operations for Donors
  */
+
+/**
+ * @swagger
+ * /-request/{bloodRequestId}:
+ *   get:
+ *     summary: Get a single blood request by its bloodRequestId
+ *     description: Allows a verified donor to fetch the details of a specific blood request by its ID.
+ *     tags:
+ *       - Requests
+ *     security:
+ *       - bearerAuth: []   # JWT Authentication
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the blood request to fetch
+ *     responses:
+ *       200:
+ *         description: Blood request fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blood request fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     hospital:
+ *                       type: object
+ *                       properties:
+ *                         fullName:
+ *                           type: string
+ *                         address:
+ *                           type: string
+ *                         phoneNumber:
+ *                           type: string
+ *                         city:
+ *                           type: string
+ *                         profilePics:
+ *                           type: string
+ *                     bloodGroup:
+ *                       type: string
+ *                     numberOfPints:
+ *                       type: integer
+ *                     preferredDate:
+ *                       type: string
+ *                       format: date
+ *                     urgencyLevel:
+ *                       type: string
+ *                     amount:
+ *                       type: number
+ *                     status:
+ *                       type: string
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Unauthorized. Donor not found.
+ *       404:
+ *         description: Blood request not found.
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/-request/:bloodRequestId', auth,  oneBloodRequestById);
+
 
 /**
  * @swagger
