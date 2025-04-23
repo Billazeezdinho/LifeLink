@@ -1,5 +1,6 @@
 const donorModel = require('../model/donorModel');
 const hospitalModel = require('../model/hospitalModel');
+const bloodRequest = require('../model/bloodRequestModel')
 
 const getUserModel = (role) => {
   if (role === 'donor') return donorModel;
@@ -93,5 +94,47 @@ exports.clearAllNotifications = async (req, res) => {
   } catch (error) {
     console.error('Error clearing all notifications:', error.message);
     res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+};
+
+exports.getUserNotifications = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userRole = req.user.role;  // assuming you have role from auth middleware
+
+    let user, fullName;
+
+    if (userRole === 'donor') {
+      user = await donorModel.findById(userId).select('fullName notifications');
+      fullName = user?.fullName;
+    } else if (userRole === 'hospital') {
+      user = await hospitalModel.findById(userId).select('fullName notifications');
+      fullName = user?.fullName;
+    } else {
+      return res.status(403).json({ message: 'Invalid user role' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} not found` });
+    }
+
+    res.status(200).json({
+      message: `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} notifications fetched successfully`,
+      user: {
+        fullName: fullName,
+        notifications: user.notifications?.map(notification => ({
+          _id: notification._id,
+          requestId: notification.requestId,
+          message: notification.message,
+          from: notification.from,
+          date: notification.date,
+          read: notification.read
+        })) || []
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching user notifications:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
