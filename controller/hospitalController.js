@@ -752,12 +752,12 @@ exports.respondToAppointment = async (req, res) => {
     appointment.status = status;
     await appointment.save();
     let emailSubject, emailText, notificationMessage;
-    if (status === 'accept') {
+    if (status === 'accepted') {
       emailSubject = 'Appointment Accepted';
       emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been accepted.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using LifeLink.`;
       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been accepted.`;
     } else if (status === 'cancel') {
-      emailSubject = 'Appointment Cancel';
+      emailSubject = 'Appointment Canceled';
       emailText = `Hello ${appointment.donor.fullName},\n\n We regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancel.\n\n Thank you for using LifeLink.`;
       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been cancel.`;
     } else if (status === 'rescheduled') {

@@ -31,7 +31,7 @@ app.use(morgan('dev'));
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
-    info: {
+    info: { 
 
 
       title: "LifeLink Documentation",
