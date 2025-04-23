@@ -79,7 +79,7 @@ app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
 app.use('/api/v1', hospitalRoutes);
 app.use('/api/v1', messageRoute);
-app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', adminRoutes);
 
 
 app.listen(PORT, ()=>{

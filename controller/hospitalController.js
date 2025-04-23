@@ -456,7 +456,32 @@ exports.forgotPassword = async (req, res) => {
           <p>Hello,</p>
           <p>We received a request to reset your password for your LifeLink account.</p>
           <p>Click the button below to reset your password:</p>
-          <a href="${resetLink}" class="button">Reset Password</a>
+
+           <!-- ✅ Mobile-responsive clickable reset button using table for email compatibility -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 0 auto;">
+            <tr>
+              <td align="center" bgcolor="#007bff" style="border-radius: 5px;">
+                <a href="${resetLink}"
+                   target="_blank"
+                   style="
+                     display: inline-block;
+                     font-size: 16px;
+                     font-family: Arial, sans-serif;
+                     color: #ffffff;
+                     text-decoration: none;
+                     padding: 12px 24px;
+                     border-radius: 5px;
+                     background-color: #007bff;
+                     border: 1px solid #007bff;
+                     width: 100%;
+                     max-width: 300px;
+                     box-sizing: border-box;
+                     text-align: center;">
+                   Reset Password
+                </a>
+              </td>
+            </tr>
+          </table>
           <p>If you did not request this, please ignore this email.</p>
           <div class="footer">
             &copy; ${new Date().getFullYear()} LifeLink. All rights reserved.

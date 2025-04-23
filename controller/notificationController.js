@@ -47,7 +47,7 @@ exports.getUnreadNotifications = async (req, res) => {
 
 exports.getAllNotifications = async (req, res) => {
   try {
-    const userModel = getUserModel(req.user.role);
+    const userModel = await getUserModel(req.user.role);
     const user = await userModel.findById(req.user._id);
 
     if (!user) return res.status(404).json({ message: 'User not found.' });
