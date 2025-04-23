@@ -43,12 +43,10 @@ exports.registerValidate = async (req, res, next) =>{
             "string.empty": "location cannot be empty",
             "string.min": "location must be at least 3 characters long"
 
-        }),
-        age: Joi.string()
+        }),age: Joi.string()
         .required()
-        .trim()
         .messages({
-            "any.required": 'age is required',
+            "any.required": "age is required",
             "string.empty": "age cannot be empty"
         })
     })
