@@ -144,97 +144,87 @@ exports.login = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: 'Server error', error: err.message });
     }
-};
-exports.submitBloodRequest = async (req, res) => { 
-  try {
-    let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
+  };
+  exports.submitBloodRequest = async (req, res) => { 
+    try {
+      let { bloodGroup, numberOfPints, preferredDate, urgencyLevel, amount } = req.body;
 
-    if (req.user.role !== 'hospital') {
-      return res.status(403).json({ message: 'Only hospitals can make a blood request' });
-    }
-
-    if (typeof amount === 'string') {
-      amount = parseFloat(amount.replace(/,/g, ''));
-    }
-
-    if (!numberOfPints) {
-      return res.status(400).json({ message: "numberOfPints is required." });
-    }
-
-    const formattedPreferredDate = moment(preferredDate, 'YYYY-MM-DD');
-
-    // Create the blood request
-    const request = new BloodRequest({
-      hospital: req.user._id,
-      bloodGroup,
-      numberOfPints,
-      preferredDate: formattedPreferredDate,
-      urgencyLevel,
-      amount,
-    });
-
-    await request.save();
-
-   
-    const hospitalName = req.user.fullName || 'Hospital';
-    await donorModel.updateMany(
-      {},
-      { $push: {
-        notifications: {
-          requestId: request._id,
-          message: `New blood request from ${hospitalName} for ${bloodGroup} blood group.`,
-          from: hospitalName,
-          date: new Date()
-        } 
+      if (req.user.role !== 'hospital') {
+        return res.status(403).json({ message: 'Only hospitals can make a blood request' });
       }
-        // $push: {
-        //   notifications: {
-        //     message: `New blood request for ${bloodGroup} blood group. Check the blood requests page.`,
-        //     from: 'LifeLink',
-        //     date: new Date()
-        //   }
-        // }
-      }
-    );
-    const donors = await donorModel.find({}, 'email');
-    const donorEmails = donors.map(donor => donor.email).filter(email => !!email);
 
-    if (donorEmails.length > 0) {
-      const emailPromises = donorEmails.map(email => 
-        sendEmail({
-          email,
-          subject: 'Urgent Blood Donation Request',
-          html: `
-            <h2>Urgent Blood Request</h2>
-            <p>A new blood donation request has been posted for blood group <strong>${bloodGroup}</strong>.</p>
-            <p>Please log in to LifeLink to check the details and schedule a donation if you can help.</p>
-          `
-        })
+      if (typeof amount === 'string') {
+        amount = parseFloat(amount.replace(/,/g, ''));
+      }
+
+      if (!numberOfPints) {
+        return res.status(400).json({ message: "numberOfPints is required." });
+      }
+
+      const formattedPreferredDate = moment(preferredDate, 'YYYY-MM-DD');
+
+      // Create the blood request
+      const request = new BloodRequest({
+        hospital: req.user._id,
+        bloodGroup,
+        numberOfPints,
+        preferredDate: formattedPreferredDate,
+        urgencyLevel,
+        amount,
+      });
+      await request.save();
+      const hospitalName = req.user.fullName || 'Hospital';
+      const newNotification = {
+        requestId: request._id,
+        message: `New blood request from ${hospitalName} for ${bloodGroup} blood group.`,
+        from: hospitalName,
+        date: new Date(),
+        read: false 
+      };
+      
+      await donorModel.updateMany(
+        {},
+        { $push: { notifications: newNotification } }
       );
+      const donors = await donorModel.find({}, 'email');
+      const donorEmails = donors.map(donor => donor.email).filter(email => !!email);
 
-      await Promise.all(emailPromises);
+      if (donorEmails.length > 0) {
+        const emailPromises = donorEmails.map(email => 
+          sendEmail({
+            email,
+            subject: 'Urgent Blood Donation Request',
+            html: `
+              <h2>Urgent Blood Request</h2>
+              <p>A new blood donation request has been posted for blood group <strong>${bloodGroup}</strong>.</p>
+              <p>Please log in to LifeLink to check the details and schedule a donation if you can help.</p>
+            `
+          })
+        );
+
+        await Promise.all(emailPromises);
+      }
+
+      const responseData = {
+        _id: request._id,
+        hospital: request.hospital,
+        bloodGroup: request.bloodGroup,
+        numberOfPints: request.numberOfPints,
+        preferredDate: moment(request.preferredDate).format('YYYY-MM-DD'), 
+        urgencyLevel: request.urgencyLevel,
+        amount: request.amount,
+        status: request.status,
+        createdAt: moment(request.createdAt).format('YYYY-MM-DD HH:mm'),
+        updatedAt: moment(request.updatedAt).format('YYYY-MM-DD HH:mm'),
+      };
+
+      res.status(201).json({ message: 'Blood request submitted successfully', data: responseData });
+
+    } catch (error) {
+      console.error('Error submitting blood request:', error.message);
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-    const responseData = {
-      _id: request._id,
-      hospital: request.hospital,
-      bloodGroup: request.bloodGroup,
-      numberOfPints: request.numberOfPints,
-      preferredDate: moment(request.preferredDate).format('YYYY-MM-DD'), 
-      urgencyLevel: request.urgencyLevel,
-      amount: request.amount,
-      status: request.status,
-      createdAt: moment(request.createdAt).format('YYYY-MM-DD HH:mm'),
-      updatedAt: moment(request.updatedAt).format('YYYY-MM-DD HH:mm'),
-    };
-
-    res.status(201).json({ message: 'Blood request submitted successfully', data: responseData });
-
-  } catch (error) {
-    console.error('Error submitting blood request:', error.message);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+  };
 
 
   exports.getAppointmentHistory = async (req, res) => {

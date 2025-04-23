@@ -19,7 +19,7 @@ const { auth, roleAuth } = require("../middleware/authMiddleware");
 //  Public routes
 /**
  * @swagger
- * /admin/register:
+ * /admin/newRegister:
  *   post:
  *     summary: Register a new admin
  *     tags: [Admin]
@@ -51,7 +51,7 @@ const { auth, roleAuth } = require("../middleware/authMiddleware");
  *       500:
  *         description: Internal server error
  */
-router.post("/register", adminRegister);
+router.post("/admin/newRegister", adminRegister);
 
 /**
  * @swagger
@@ -82,7 +82,7 @@ router.post("/register", adminRegister);
  *         description: Internal server error
  */
 
-router.post("/login", adminLogin);
+router.post("/admin/login", adminLogin);
 
 /**
  * @swagger
@@ -108,7 +108,7 @@ router.post("/login", adminLogin);
  *       500:
  *         description: Internal server error
  */
-router.post("/forgotPassword", forgotPassword);
+router.post("/admin/forgotPassword", forgotPassword);
 
 /**
  * @swagger
@@ -140,7 +140,7 @@ router.post("/forgotPassword", forgotPassword);
  *       500:
  *         description: Internal server error
  */
-router.post("/resetPassword", auth, roleAuth(["admin"]), resetPassword);
+router.post("/admin/resetPassword", auth, roleAuth(["admin"]), resetPassword);
 /**
  * @swagger
  * /admin/users:
@@ -155,7 +155,7 @@ router.post("/resetPassword", auth, roleAuth(["admin"]), resetPassword);
  *       500:
  *         description: Internal server error
  */
-router.get("/users", auth, roleAuth(["admin"]), viewUsers);
+router.get("/admin/users", auth, roleAuth(["admin"]), viewUsers);
 
 /**
  * @swagger
@@ -181,7 +181,7 @@ router.get("/users", auth, roleAuth(["admin"]), viewUsers);
  *         description: Internal server error
  */
 
-router.delete("/delete/:userId", auth, roleAuth(["admin"]), deleteUser);
+router.delete("/admin/delete/:userId", auth, roleAuth(["admin"]), deleteUser);
 
 /**
  * @swagger
@@ -208,7 +208,7 @@ router.delete("/delete/:userId", auth, roleAuth(["admin"]), deleteUser);
  *       500:
  *         description: Internal server error
  */
-router.patch("/verify-kyc/:kycId", auth, roleAuth(["admin"]), approveKYC);
+router.patch("/admin/verify-kyc/:kycId", auth, roleAuth(["admin"]), approveKYC);
 
 /**
  * @swagger
@@ -235,7 +235,7 @@ router.patch("/verify-kyc/:kycId", auth, roleAuth(["admin"]), approveKYC);
  *       500:
  *         description: Internal server error
  */
-router.patch("/decline-kyc/:kycId", auth, roleAuth(["admin"]), declineKYC);
+router.patch("/admin/decline-kyc/:kycId", auth, roleAuth(["admin"]), declineKYC);
 
 /**
  * @swagger
@@ -304,6 +304,6 @@ router.patch("/decline-kyc/:kycId", auth, roleAuth(["admin"]), declineKYC);
  *         description: Server error
  */
 
-router.get('/allKyc', auth, roleAuth(["admin"]),getAllKYCSubmissions);
+router.get('/admin/allKyc', auth, roleAuth(["admin"]),getAllKYCSubmissions);
 
 module.exports = router;

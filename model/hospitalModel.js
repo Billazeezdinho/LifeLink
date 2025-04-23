@@ -19,17 +19,21 @@ const HospitalSchema = new mongoose.Schema({
     from:{
       type: String
     },
+    read:{
+      type: Boolean,
+      default: false
+    },
     requestId:{
       type: String
     },
     date:{
       type: Date, default: Date.now
-    }
+    },
   }],
   
   paymentStatus: {
     type: Boolean,
-    default: false, // Default to unpaid
+    default: false, 
   },
   payment: {
     type: mongoose.Schema.Types.ObjectId,

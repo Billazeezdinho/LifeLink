@@ -77,6 +77,10 @@ const donorSchema = new mongoose.Schema(
       requestId:{
         type: String
       },
+      read:{
+        type: Boolean,
+        default: false
+      },
       date:{
         type: Date, default: Date.now
       }

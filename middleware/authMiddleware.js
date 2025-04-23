@@ -7,7 +7,7 @@ const blacklistedTokens = new Set();
 
 const auth = async (req, res, next) => {
   try {
-    // Extract token from Authorization header
+    
     const token = req.headers.authorization?.split(" ")[1];
     
     // Check if token exists
@@ -21,7 +21,7 @@ const auth = async (req, res, next) => {
     }
   
     // Verify JWT token
-    const decoded = jwt.verify(token, process.env.key); // Use a more descriptive variable name for the secret
+    const decoded = jwt.verify(token, process.env.key); 
     console.log('Decode',decoded)
     let user;
 

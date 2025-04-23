@@ -5,6 +5,7 @@ const PORT = process.env.PORT;
 const donorRouter = require('./routes/donorRouter')
 const transactionRouter = require('./routes/transactionRouter')
 const hospitalRoutes = require('./routes/hospitalRoutes')
+const messageRoute = require('./routes/messageRoute')
 const adminRoutes = require('./routes/adminRoutes');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -77,6 +78,7 @@ app.get('/', (req, res)=>{
 app.use('/api/v1', donorRouter);
 app.use('/api/v1', transactionRouter);
 app.use('/api/v1', hospitalRoutes);
+app.use('/api/v1', messageRoute);
 app.use('/api/v1/admin', adminRoutes);
 
 
