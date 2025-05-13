@@ -33,7 +33,7 @@ exports.initializePayment = async (req, res) => {
 
         const amount = plans[plan];
         const formattedDate = new Date().toLocaleString();
-        const reference = `LifeLink-${otpGenerator.generate(10, { specialChars: false })}`;
+        const reference = `ALIFE-${otpGenerator.generate(10, { specialChars: false })}`;
 
         // Prepare payment data
         const paymentData = {

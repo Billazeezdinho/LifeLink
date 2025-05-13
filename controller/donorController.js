@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
         const firstName = donor.fullName.split(" ")[0];
         const mailDetails = {
         email: donor.email,
-        subject: "🌹 Welcome to LIFELINK",
+        subject: "🌹 Welcome to ALIFE",
         html: welcomeMail(firstName, link),
       };
 
@@ -806,7 +806,7 @@ exports.bookAppointment = async (req, res) => {
           - Appointment Date: ${formattedDate}
           - Appointment Time: ${populatedAppointment.time}
           
-          Please log into the Lifelink app to manage the appointment.
+          Please log into the ALIFE app to manage the appointment.
           `
           });
 
@@ -815,7 +815,7 @@ exports.bookAppointment = async (req, res) => {
               appointmentId: appointment._id,
               notifications: {
                 message: `New appointment request from ${populatedAppointment.donor.fullName} for ${formattedDate} at ${populatedAppointment.time}.`,
-                from: 'LifeLink',
+                from: 'ALIFE',
                 date: new Date()
               }
             }

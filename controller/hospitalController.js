@@ -64,7 +64,7 @@ exports.register =async (req, res) => {
         const hospitalName = hospital.fullName.split(" ")[0];
         const mailDetails = {
         email: hospital.email,
-        subject: "Welcome to LIFELINK",
+        subject: "Welcome to ALIFE",
         html: welcomeMail(hospitalName, link),
       };
     await hospital.save();
@@ -197,7 +197,7 @@ exports.login = async (req, res) => {
             html: `
               <h2>Urgent Blood Request</h2>
               <p>A new blood donation request has been posted for blood group <strong>${bloodGroup}</strong>.</p>
-              <p>Please log in to LifeLink to check the details and schedule a donation if you can help.</p>
+              <p>Please log in to ALIFE to check the details and schedule a donation if you can help.</p>
             `
           })
         );
@@ -454,7 +454,7 @@ exports.forgotPassword = async (req, res) => {
         <div class="container">
           <h2>Password Reset Request</h2>
           <p>Hello,</p>
-          <p>We received a request to reset your password for your LifeLink account.</p>
+          <p>We received a request to reset your password for your ALIFE account.</p>
           <p>Click the button below to reset your password:</p>
 
            <!-- ✅ Mobile-responsive clickable reset button using table for email compatibility -->
@@ -484,7 +484,7 @@ exports.forgotPassword = async (req, res) => {
           </table>
           <p>If you did not request this, please ignore this email.</p>
           <div class="footer">
-            &copy; ${new Date().getFullYear()} LifeLink. All rights reserved.
+            &copy; ${new Date().getFullYear()} ALIFE. All rights reserved.
           </div>
         </div>
       </body>
@@ -663,10 +663,10 @@ exports.getHospitalAppointments = async (req, res) => {
 
 // Your appointment request has been ${status} by the hospital.
 
-// Please log in to your LifeLink dashboard to view more details.
+// Please log in to your ALIFE dashboard to view more details.
 
 // Thank you,
-// LifeLink Team`
+// ALIFE Team`
 //     );
 
 //     await donorModel.findByIdAndUpdate(appointment.donor._id, {
@@ -779,15 +779,15 @@ exports.respondToAppointment = async (req, res) => {
     let emailSubject, emailText, notificationMessage;
     if (status === 'accepted') {
       emailSubject = 'Appointment Accepted';
-      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been accepted.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using LifeLink.`;
+      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been accepted.\n\nDate: ${appointment.date}\nTime: ${appointment.time}\n\nThank you for using ALIFE.`;
       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been accepted.`;
     } else if (status === 'cancel') {
       emailSubject = 'Appointment Canceled';
-      emailText = `Hello ${appointment.donor.fullName},\n\n We regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancel.\n\n Thank you for using LifeLink.`;
+      emailText = `Hello ${appointment.donor.fullName},\n\n We regret to inform you that your appointment with ${appointment.hospital.fullName} has been cancel.\n\n Thank you for using ALIFE.`;
       notificationMessage = `Your appointment on ${appointment.date.toDateString()} at ${appointment.time} has been cancel.`;
     } else if (status === 'rescheduled') {
       emailSubject = 'Appointment Rescheduled';
-      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been rescheduled.\n\nNew Date: ${appointment.date}\nNew Time: ${appointment.time}\n\nThank you for using LifeLink.`;
+      emailText = `Hello ${appointment.donor.fullName},\n\nYour appointment with ${appointment.hospital.fullName} has been rescheduled.\n\nNew Date: ${appointment.date}\nNew Time: ${appointment.time}\n\nThank you for using ALIFE.`;
       notificationMessage = `Your appointment has been rescheduled to ${appointment.date.toDateString()} at ${appointment.time}.`;
     }
 
