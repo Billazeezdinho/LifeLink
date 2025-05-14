@@ -5,7 +5,7 @@ const welcomeMail = (fullName, link) => {
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <title>Welcome to Alife</title>
+      <title>Welcome to ALIFE</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -94,12 +94,12 @@ const welcomeMail = (fullName, link) => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Alife🌹</h1>
+          <h1>Welcome to ALIFE🌹</h1>
         </div>
         <div class="content">
           <h2>Hello, ${fullName} 👋</h2>
           <p>
-            Welcome to <strong>Alife</strong>! We're thrilled to have you join our life-saving community of donors.
+            Welcome to <strong>ALIFE</strong>! We're thrilled to have you join our life-saving community of donors.
           </p>
           <p>
             To complete your registration and start making a difference, please verify your email address by clicking the button below.
@@ -108,11 +108,11 @@ const welcomeMail = (fullName, link) => {
             <a href="${link}" class="cta-button" target="_blank" rel="noopener noreferrer">Verify Your Account</a>
           </div>
           <p style="margin-top: 20px; font-size: 14px; color: #555;">
-            If you did not sign up for Alife, please ignore this email.
+            If you did not sign up for ALIFE, please ignore this email.
           </p>
         </div>
         <div class="footer">
-          &copy; ${new Date().getFullYear()} 🌹Alife. All rights reserved.
+          &copy; ${new Date().getFullYear()} 🌹ALIFE. All rights reserved.
         </div>
       </div>
     </body>
